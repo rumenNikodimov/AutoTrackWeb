@@ -9,7 +9,7 @@ import { useState } from "react";
 import { Register } from "./pages/auth/Register";
 import { AddFuel } from "./pages/fuel/AddFuel";
 import { EditFuel } from "./pages/fuel/EditFuel";
-import { Dashboard } from "./pages/Dashboard";
+import { Dashboard } from "./pages/dashboard/Dashboard";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { MobileNav } from "./components/MobileNav";
 
