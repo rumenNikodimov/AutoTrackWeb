@@ -1,6 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { createHoverHandlers } from "../utils/uiHandlers";
 
 type Props = {
   vehicle: any;
@@ -11,21 +12,7 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
   const navigate = useNavigate();
 
   return (
-    
-<div
-    style={card}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = "scale(1.02)";
-      e.currentTarget.style.boxShadow =
-        "0 15px 30px rgba(0,0,0,0.6)";
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = "scale(1)";
-      e.currentTarget.style.boxShadow =
-        "0 10px 20px rgba(0,0,0,0.4)";
-    }}
-  >
-
+    <div style={card}>
       {/* ✅ Info */}
       <div style={{ marginBottom: 12 }}>
         <div style={title}>
@@ -43,18 +30,8 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
       {/* ✅ Primary actions */}
       <div style={row}>
         <button
+          {...createHoverHandlers("rgba(59,130,246,0.6)")}
           style={primaryBtn}
-          
-          onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 0 12px rgba(59,130,246,0.6)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
-
           onClick={() =>
             navigate(`/vehicles/${vehicle.id}/dashboard`)
           }
@@ -63,18 +40,8 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
         </button>
 
         <button
+          {...createHoverHandlers("rgba(16,185,129,0.6)")}
           style={primaryBtn}
-          
-          onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 0 12px rgba(59,130,246,0.6)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
-
           onClick={() =>
             navigate(`/vehicles/${vehicle.id}/fuel/add`)
           }
@@ -86,18 +53,8 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
       {/* ✅ Secondary actions */}
       <div style={row}>
         <button
+          {...createHoverHandlers("rgba(107,114,128,0.6)")}
           style={secondaryBtn}
-          
-          onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 0 12px rgba(59,130,246,0.6)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
-
           onClick={() =>
             navigate(`/vehicles/${vehicle.id}/fuel`)
           }
@@ -106,18 +63,8 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
         </button>
 
         <button
+          {...createHoverHandlers("rgba(107,114,128,0.6)")}
           style={secondaryBtn}
-          
-          onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 0 12px rgba(59,130,246,0.6)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
-
           onClick={() =>
             navigate(`/vehicles/edit/${vehicle.id}`)
           }
@@ -126,18 +73,8 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
         </button>
 
         <button
+          {...createHoverHandlers("rgba(239,68,68,0.6)")}
           style={dangerBtn}
-          
-          onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 0 12px rgba(59,130,246,0.6)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
-
           onClick={() => onDelete(vehicle.id)}
         >
           🗑 Delete

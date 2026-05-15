@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { apiDelete, apiGet } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import { VehicleCard } from "../../components/VehicleCard";
+import { createHoverHandlers } from "../../utils/uiHandlers";
 
 type Vehicle = {
   id: number;
@@ -91,11 +92,11 @@ debugger
           flexWrap: "wrap"
         }}
       >
-        <button style={btn} onClick={onLogout}>
+        <button {...createHoverHandlers("rgba(59,130,246,0.6)")} style={btn} onClick={onLogout}>
           Logout
         </button>
 
-        <button style={btn} onClick={() => navigate("/vehicles/add")}>
+        <button {...createHoverHandlers("rgba(59,130,246,0.6)")} style={btn} onClick={() => navigate("/vehicles/add")}>
           ➕ Add Vehicle
         </button>
       </div>

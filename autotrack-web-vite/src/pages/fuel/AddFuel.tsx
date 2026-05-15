@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiPost } from "../../services/api";
 import { EnergyType } from "../../types/enums/EnergyType";
+import { createHoverHandlers } from "../../utils/uiHandlers";
 
 export function AddFuel() {
   const navigate = useNavigate();
@@ -162,13 +163,17 @@ export function AddFuel() {
             </p>
           )}
          <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-            <button type="submit" style={btn}>
+            <button 
+              type="submit" 
+              {...createHoverHandlers("rgba(59,130,246,0.6)")} 
+              style={btn}>
               💾 Save
             </button>
 
             <button
               type="button"
               onClick={() => navigate(-1)}
+              {...createHoverHandlers("rgba(107,114,128,0.6)")}
               style={cancelBtn}
             >
               ❌ Cancel

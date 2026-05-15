@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiPost } from "../../services/api";
 import { FuelType } from "../../types/enums/FuelType";
+import { createHoverHandlers } from "../../utils/uiHandlers";
 
 export function AddVehicle() {
   const navigate = useNavigate();
@@ -162,7 +163,10 @@ export function AddVehicle() {
             />
           </Field>
 
-          <button type="submit" style={btn} disabled={loading}>
+          <button 
+            type="submit" 
+            {...createHoverHandlers("rgba(59,130,246,0.6)")} 
+            style={btn} disabled={loading}>
             {loading ? "Saving..." : "Save"}
           </button>
         </form>

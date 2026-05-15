@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { apiPost } from "../../services/api";
 import { useNavigate, Link } from "react-router-dom";
+import { createHoverHandlers } from "../../utils/uiHandlers";
 
 type Props = {
   onLogin: (token: string) => void;
@@ -67,7 +68,7 @@ export function Login({ onLogin }: Props) {
           </Field>
 
           {/* ✅ Button */}
-          <button type="submit" disabled={loading} style={btn}>
+          <button type="submit" disabled={loading} {...createHoverHandlers("rgba(59,130,246,0.6)")} style={btn}>
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>

@@ -2,6 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { apiGet, apiDelete } from "../../services/api";
+import { createHoverHandlers } from "../../utils/uiHandlers";
 
 type FuelEntry = {
   id: number;
@@ -115,6 +116,7 @@ export function FuelList({ vehicleId }: Props) {
         onClick={() =>
           navigate(`/vehicles/${vehicleId}/fuel/add`)
         }
+        {...createHoverHandlers("rgba(59,130,246,0.6)")}
         style={{
           position: "fixed",
           bottom: 80,
@@ -176,6 +178,7 @@ function AnimatedBtn({
   return (
     <button
       onClick={onClick}
+      {...createHoverHandlers("rgba(59,130,246,0.6)")}
       style={{
         padding: "8px 12px",
         borderRadius: 10,
