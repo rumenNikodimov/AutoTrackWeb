@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { apiDelete, apiGet } from "../../services/api";
 import { useNavigate } from "react-router-dom";
+import { VehicleCard } from "../../components/VehicleCard";
 
 type Vehicle = {
   id: number;
@@ -72,68 +73,12 @@ debugger
 
       {/* ✅ Vehicle cards */}
       {vehicles.map((vehicle) => (
-        <div
+       
+        <VehicleCard
           key={vehicle.id}
-          style={{
-            background: "#1e293b",
-            padding: 15,
-            borderRadius: 12,
-            marginBottom: 15
-          }}
-        >
-          <div style={{ marginBottom: 10 }}>
-            <strong>
-              {vehicle.brand} {vehicle.model}
-            </strong>
-            <div style={{ fontSize: 14, opacity: 0.7 }}>
-              {vehicle.year} • {vehicle.licensePlate}
-            </div>
-          </div>
-
-          {/* ✅ Buttons */}
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              flexWrap: "wrap"
-            }}
-          >
-            <button
-              style={btn}
-              onClick={() =>
-                navigate(`/vehicles/${vehicle.id}/dashboard`)
-              }
-            >
-              📊 Dashboard
-            </button>
-              
-            <button onClick={() => navigate(`/vehicles/edit/${vehicle.id}`)}>
-              ✏️ Edit
-            </button>
-              
-            <button onClick={() => handleDelete(vehicle.id)}>
-              🗑 Delete
-            </button>
-
-            <button
-              style={btn}
-              onClick={() =>
-                navigate(`/vehicles/${vehicle.id}/fuel`)
-              }
-            >
-              ⛽ Fuel log
-            </button>
-
-            <button
-              style={btn}
-              onClick={() =>
-                navigate(`/vehicles/${vehicle.id}/fuel/add`)
-              }
-            >
-              ➕ Add fuel
-            </button>
-          </div>
-        </div>
+          vehicle={vehicle}
+          onDelete={handleDelete}
+        />
       ))}
 
       {/* ✅ Bottom actions */}
@@ -167,3 +112,12 @@ const btn: React.CSSProperties = {
   cursor: "pointer",
   minWidth: 80
 };
+
+
+function Button({ type }) {
+  const styles = {
+    primary: { background: "#3b82f6" },
+    secondary: { background: "#374151" },
+    danger: { background: "#ef4444" }
+  };
+}
