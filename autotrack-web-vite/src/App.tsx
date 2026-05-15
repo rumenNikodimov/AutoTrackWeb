@@ -12,6 +12,8 @@ import { EditFuel } from "./pages/fuel/EditFuel";
 import { Dashboard } from "./pages/dashboard/Dashboard";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { MobileNav } from "./components/MobileNav";
+import { EditVehicle } from "./pages/vehicles/EditVehicle";
+import { LanguageSwitcher } from "./components/LanguageSwitcher";
 
 
 function FuelWrapper() {
@@ -45,6 +47,12 @@ function DashboardWrapper() {
 
   return (
     <BrowserRouter>
+
+      {/* ✅ GLOBAL LANGUAGE SWITCH */}
+      <div style={topBar}>
+        <LanguageSwitcher />
+      </div>
+
       <Routes>
         <Route
           path="/login"
@@ -78,6 +86,11 @@ function DashboardWrapper() {
           path="/vehicles/:vehicleId/dashboard"
           element={<DashboardWrapper />}
         />
+ 
+        <Route 
+          path="/vehicles/edit/:id" 
+          element={<EditVehicle />} 
+        />
 
         <Route 
           path="*" 
@@ -91,3 +104,11 @@ function DashboardWrapper() {
 }
 
 export default App;
+
+//Styles
+const topBar = {
+  position: "fixed",
+  top: 10,
+  right: 10,
+  zIndex: 9999
+};

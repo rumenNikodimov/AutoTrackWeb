@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { apiGet, apiDelete } from "../../services/api";
 import { createHoverHandlers } from "../../utils/uiHandlers";
+import { useTranslation } from "react-i18next";
 
 type FuelEntry = {
   id: number;
@@ -49,6 +50,7 @@ export function FuelList({ vehicleId }: Props) {
   const [entries, setEntries] = useState<FuelEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const { t } = useTranslation();
   useEffect(() => {
     apiGet<FuelEntry[]>(`fuel/vehicle/${vehicleId}`)
       .then(setEntries)
@@ -56,7 +58,7 @@ export function FuelList({ vehicleId }: Props) {
   }, [vehicleId]);
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Delete entry?")) return;
+    if (!confirm(t("deleteEntry"))) return;
 
     await apiDelete(`fuel/${id}`);
     setEntries(prev => prev.filter(e => e.id !== id));
@@ -72,7 +74,7 @@ export function FuelList({ vehicleId }: Props) {
 
   return (
     <div style={{ maxWidth: 600, margin: "20px auto", padding: 10 }}>
-      <h2 style={{ textAlign: "center" }}>Fuel Entries</h2>
+      <h2 style={{ textAlign: "center" }}>{t("fuelEntries")}</h2>
 
       {/* ✅ LIST */}
       {sorted.map((e, i) => (
@@ -95,7 +97,7 @@ export function FuelList({ vehicleId }: Props) {
           </div>
 
           <div style={{ marginTop: 5 }}>
-            ⛽ {e.fuelAmount} L • 💰 {e.totalPrice.toFixed(2)} лв
+            ⛽ {e.fuelAmount} L • 💰 {e.totalPrice.toFixed(2)} {t("currency")}
           </div>
 
           {/* ✅ ACTIONS */}
@@ -138,7 +140,7 @@ export function FuelList({ vehicleId }: Props) {
       {/* ✅ CONSUMPTION */}
       {consumptions.length > 0 && (
         <>
-          <h3 style={{ marginTop: 20 }}>Consumption</h3>
+          <h3 style={{ marginTop: 20 }}>{t("consumption")}</h3>
 
           {consumptions.map(c => (
             <div

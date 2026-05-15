@@ -1,8 +1,8 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { createHoverHandlers } from "../utils/uiHandlers";
-
+import { useTranslation } from "react-i18next";
+  
 type Props = {
   vehicle: any;
   onDelete: (id: number) => void;
@@ -10,9 +10,19 @@ type Props = {
 
 export function VehicleCard({ vehicle, onDelete }: Props) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
-    <div style={card}>
+    <div  style={card}
+
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "scale(1.01)";
+            }}
+
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+            }}
+          >
       {/* ✅ Info */}
       <div style={{ marginBottom: 12 }}>
         <div style={title}>
@@ -30,54 +40,62 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
       {/* ✅ Primary actions */}
       <div style={row}>
         <button
-          {...createHoverHandlers("rgba(59,130,246,0.6)")}
-          style={primaryBtn}
-          onClick={() =>
+           {...createHoverHandlers("rgba(107,114,128,0.6)")}
+          style={secondaryBtn}
+          onClick={(e) => {
+            e.stopPropagation();
             navigate(`/vehicles/${vehicle.id}/dashboard`)
-          }
+          }}
         >
-          📊 Dashboard
+          📊 {t("dashboard")}
         </button>
 
         <button
-          {...createHoverHandlers("rgba(16,185,129,0.6)")}
-          style={primaryBtn}
-          onClick={() =>
+           {...createHoverHandlers("rgba(107,114,128,0.6)")}
+          style={secondaryBtn}
+          onClick={(e) => {
+            e.stopPropagation();
             navigate(`/vehicles/${vehicle.id}/fuel/add`)
-          }
+          }}
         >
-          ➕ Add fuel
+          ➕ {t("addFuel")} 
         </button>
       </div>
 
       {/* ✅ Secondary actions */}
       <div style={row}>
         <button
+          type="button"
           {...createHoverHandlers("rgba(107,114,128,0.6)")}
           style={secondaryBtn}
-          onClick={() =>
-            navigate(`/vehicles/${vehicle.id}/fuel`)
-          }
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/vehicles/${vehicle.id}/fuel`);
+          }}
         >
-          ⛽ Fuel log
+          ⛽ {t("fuelLog")}       
         </button>
 
+        
         <button
           {...createHoverHandlers("rgba(107,114,128,0.6)")}
           style={secondaryBtn}
-          onClick={() =>
-            navigate(`/vehicles/edit/${vehicle.id}`)
-          }
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            navigate(`/vehicles/edit/${vehicle.id}`);
+          }}
         >
-          ✏️ Edit
+          ✏️ {t("edit")}
         </button>
+
 
         <button
           {...createHoverHandlers("rgba(239,68,68,0.6)")}
           style={dangerBtn}
           onClick={() => onDelete(vehicle.id)}
         >
-          🗑 Delete
+          🗑 {t("delete")}
         </button>
       </div>
     </div>

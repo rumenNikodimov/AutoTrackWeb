@@ -3,10 +3,13 @@ import { useState } from "react";
 import { apiPost } from "../../services/api";
 import { useNavigate, Link } from "react-router-dom";
 import { createHoverHandlers } from "../../utils/uiHandlers";
+import { useTranslation } from "react-i18next";
+//import i18n from "../../i18n";
 
 type Props = {
   onLogin: (token: string) => void;
 };
+
 
 export function Login({ onLogin }: Props) {
   const [email, setEmail] = useState("");
@@ -16,6 +19,7 @@ export function Login({ onLogin }: Props) {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +36,7 @@ export function Login({ onLogin }: Props) {
       onLogin(result.token);
       navigate("/vehicles");
     } catch (e: any) {
-      setError(e.message || "Login failed");
+      setError(e.message || t("loginFailed"));
     } finally {
       setLoading(false);
     }
@@ -41,23 +45,23 @@ export function Login({ onLogin }: Props) {
   return (
     <div style={container}>
       <div style={card}>
-        <h2 style={title}>Login</h2>
+        <h2 style={title}>{t("login")}</h2>
 
         <form onSubmit={handleSubmit}>
           {/* ✅ Email */}
-          <Field label="Email">
+          <Field label={t("email")}>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="test@mail.com"
+              placeholder={t("emailPlaceholder")}
               style={input}
               autoFocus
             />
           </Field>
 
           {/* ✅ Password */}
-          <Field label="Password">
+          <Field label={t("password")}>
             <input
               type="password"
               value={password}
@@ -68,8 +72,13 @@ export function Login({ onLogin }: Props) {
           </Field>
 
           {/* ✅ Button */}
-          <button type="submit" disabled={loading} {...createHoverHandlers("rgba(59,130,246,0.6)")} style={btn}>
-            {loading ? "Logging in..." : "Login"}
+          <button
+            type="submit"
+            disabled={loading}
+            {...createHoverHandlers("rgba(59,130,246,0.6)")}
+            style={btn}
+          >
+            {loading ? t("loggingIn") : t("login")}
           </button>
         </form>
 
@@ -77,15 +86,17 @@ export function Login({ onLogin }: Props) {
 
         {/* ✅ Navigation */}
         <p style={footerText}>
-          Don't have an account?{" "}
+          {t("noAccount")}{" "}
           <Link to="/register" style={link}>
-            Register
+            {t("register")}
           </Link>
         </p>
       </div>
     </div>
   );
 }
+``
+
 
 /* ✅ Field wrapper */
 function Field({

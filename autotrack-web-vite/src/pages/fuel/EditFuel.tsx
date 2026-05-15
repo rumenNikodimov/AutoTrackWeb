@@ -4,10 +4,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { apiGet, apiPut } from "../../services/api";
 import { EnergyType } from "../../types/enums/EnergyType";
 import { createHoverHandlers } from "../../utils/uiHandlers";
+import { useTranslation } from "react-i18next";
 
 export function EditFuel() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [odometerKm, setOdometerKm] = useState<number | null>(null);
   const [amount, setAmount] = useState<number | null>(null);
@@ -18,33 +20,12 @@ export function EditFuel() {
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
-  // ✅ Compute price per unit
   const pricePerUnit =
-    amount !== null && amount > 0 && totalPrice !== null
-      ? totalPrice / amount
-      : null;
- 
-      // ✅ validation helper
-    const isInvalid = (value: any) =>
-      value === null || value === "" || value <= 0;
-    // ✅ Load data
-    useEffect(() => {
+    amount && totalPrice ? totalPrice / amount : null;
+
+  useEffect(() => {
     if (!id) return;
 
-     // ✅ dynamic style
-  const getInputStyle = (invalid: boolean) => ({
-    width: "100%",
-    padding: "12px 16px",
-    borderRadius: 12,
-    background: "#0f172a",
-    color: "white",
-    fontSize: 16,
-    boxSizing: "border-box",
-    border: invalid
-      ? "2px solid #ef4444"
-      : "1px solid rgba(255,255,255,0.1)"
-  });
-  
     apiGet<any>(`fuel/${id}`)
       .then((data) => {
         setOdometerKm(data.odometerKm);
@@ -52,7 +33,7 @@ export function EditFuel() {
         setTotalPrice(data.totalPrice);
         setEnergyType(data.energyType);
       })
-      .catch((e) => setError(e.message))
+      .catch(() => setError(t("loadFuelError")))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -60,10 +41,8 @@ export function EditFuel() {
     setSubmitted(true);
     e.preventDefault();
 
-    setError(null);
-
-    if (!odometerKm || !amount || !energyType || !totalPrice) {
-      setError("Please fill all required fields");
+    if (!odometerKm || !amount || !totalPrice) {
+      setError(t("fillFields"));
       return;
     }
 
@@ -78,43 +57,46 @@ export function EditFuel() {
 
       navigate(-1);
     } catch (e: any) {
-      setError(e.message);
+      setError(e.message || t("updateFailed"));
     }
   };
 
-  if (loading) return <p style={{ padding: 20 }}>Loading...</p>;
+  if (loading) return <p style={{ padding: 20 }}>{t("loading")}</p>;
 
   return (
     <div style={container}>
-      <div style={card}>
-        <h2 style={title}>Edit Entry</h2>
+      <LanguageSwitcher />
 
-        {/* {error && <p style={errorStyle}>{error}</p>} */}
+      <div style={card}>
+        <h2 style={title}>{t("editEntry")}</h2>
 
         <form onSubmit={handleSubmit}>
-          {/* ✅ Energy Type FIRST */}
-          <Field label="Energy Type">
+          {/* ✅ Energy Type */}
+          <Field label={t("energyType")}>
             <select
               value={energyType}
               onChange={(e) =>
                 setEnergyType(Number(e.target.value))
               }
-              
-              style={{...input,
+              style={{
+                ...input,
                 border:
-                  submitted && (EnergyType === null)
+                  submitted && energyType === null
                     ? "2px solid #ef4444"
                     : "1px solid rgba(255,255,255,0.1)"
               }}
-
             >
-              <option value={EnergyType.Fuel}>Fuel</option>
-              <option value={EnergyType.Electric}>Electric</option>
+              <option value={EnergyType.Fuel}>
+                {t("fuel")}
+              </option>
+              <option value={EnergyType.Electric}>
+                {t("electric")}
+              </option>
             </select>
           </Field>
 
           {/* ✅ Odometer */}
-          <Field label="Odometer (km)">
+          <Field label={t("odometer")}>
             <input
               type="number"
               value={odometerKm ?? ""}
@@ -125,23 +107,18 @@ export function EditFuel() {
                     : Number(e.target.value)
                 )
               }
-              style={{...input,
+              style={{
+                ...input,
                 border:
-                  submitted && (odometerKm === null || odometerKm <= 0)
+                  submitted && (!odometerKm || odometerKm <= 0)
                     ? "2px solid #ef4444"
-                    : "1px solid rgba(255,255,255,0.1)"
+                    : input.border
               }}
             />
           </Field>
 
           {/* ✅ Amount */}
-          <Field
-            label={
-              energyType === EnergyType.Electric
-                ? "Energy (kWh)"
-                : "Fuel (liters)"
-            }
-          >
+          <Field label={energyType === EnergyType.Electric ? t("energy") : t("fuelAmount")}>
             <input
               type="number"
               value={amount ?? ""}
@@ -152,26 +129,20 @@ export function EditFuel() {
                     : Number(e.target.value)
                 )
               }
-               style={{...input,
+              style={{
+                ...input,
                 border:
-                  submitted && (amount === null || amount <= 0)
+                  submitted && (!amount || amount <= 0)
                     ? "2px solid #ef4444"
-                    : "1px solid rgba(255,255,255,0.1)"
+                    : input.border
               }}
             />
           </Field>
 
-          {/* ✅ Total price */}
-          <Field
-            label={
-              energyType === EnergyType.Electric
-                ? "Electricity price"
-                : "Fuel price"
-            }
-          >
+          {/* ✅ Price */}
+          <Field label={energyType === EnergyType.Electric ? t("electricPrice") : t("fuelPrice")}>
             <input
               type="number"
-              step="0.01"
               value={totalPrice ?? ""}
               onChange={(e) =>
                 setTotalPrice(
@@ -180,61 +151,55 @@ export function EditFuel() {
                     : Number(e.target.value)
                 )
               }
-              style={{...input,
+              style={{
+                ...input,
                 border:
-                  submitted && (totalPrice === null || totalPrice <= 0)
+                  submitted && (!totalPrice || totalPrice <= 0)
                     ? "2px solid #ef4444"
-                    : "1px solid rgba(255,255,255,0.1)"
+                    : input.border
               }}
             />
           </Field>
 
-          {/* ✅ Computed price */}
-          {pricePerUnit !== null && (
-            <p style={{ textAlign: "center", marginTop: 15 }}>
-              {energyType === EnergyType.Electric
-                ? `Price/kWh: ${pricePerUnit.toFixed(2)}`
-                : `Price/L: ${pricePerUnit.toFixed(2)}`}
+          {/* ✅ Calculated */}
+          {pricePerUnit && (
+            <p style={{ textAlign: "center" }}>
+              {t("pricePerUnit")}: {pricePerUnit.toFixed(2)} {t("currency")}/{energyType === EnergyType.Electric ? t("kWh") : t("liter")}
             </p>
           )}
 
+          {/* ✅ Buttons */}
           <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-            <button 
-              type="submit" 
-              {...createHoverHandlers("rgba(59,130,246,0.6)")} 
-              style={btn}>
-              💾 Save
+            <button
+              {...createHoverHandlers("rgba(59,130,246,0.6)")}
+              type="submit"
+              style={btn}
+            >
+              💾 {t("saveChanges")}
             </button>
 
             <button
-              type="button"
               {...createHoverHandlers("rgba(107,114,128,0.6)")}
+              type="button"
               onClick={() => navigate(-1)}
               style={cancelBtn}
             >
-              ❌ Cancel
+              ❌ {t("cancel")}
             </button>
           </div>
         </form>
-         {error && (
-          <p style={{ color: "red", marginTop: 10 }}>
-            {error}
-          </p>
+
+        {error && (
+          <p style={{ color: "red", marginTop: 10 }}>{error}</p>
         )}
       </div>
     </div>
   );
 }
 
-/* ✅ reusable */
+/* ✅ Field */
 
-function Field({
-  label,
-  children
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, children }: any) {
   return (
     <div style={{ marginBottom: 16 }}>
       <div style={labelStyle}>{label}</div>
@@ -242,6 +207,7 @@ function Field({
     </div>
   );
 }
+
 
 /* ✅ styles */
 

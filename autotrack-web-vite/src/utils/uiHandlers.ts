@@ -1,4 +1,3 @@
-
 export const createHoverHandlers = (color: string) => ({
   onMouseEnter: (e: React.MouseEvent<HTMLButtonElement>) => {
     e.currentTarget.style.transform = "translateY(-2px)";
@@ -11,11 +10,11 @@ export const createHoverHandlers = (color: string) => ({
   },
 
   onMouseDown: (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.currentTarget.style.transform = "scale(0.95)";
-    e.currentTarget.style.boxShadow = `0 0 10px ${color}`;
+    e.currentTarget.style.transform = "scale(0.95)"; 
   },
 
   onMouseUp: (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.currentTarget.style.transform = "translateY(-2px)";
+    e.currentTarget.style.transform = "translateY(-2px)"; 
   }
 });
+

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiGet, apiPut } from "../../services/api";
 import { FuelType } from "../../types/enums/FuelType";
+import { useTranslation } from "react-i18next";
 
 export function EditVehicle() {
   const navigate = useNavigate();
@@ -19,41 +20,45 @@ export function EditVehicle() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ normalize функция
+  
+  const { t } = useTranslation();
+
+
+  // ✅ normalize helper
   function normalize(input: string) {
     return input.toUpperCase().replace(/\s/g, "");
   }
 
-  // ✅ Load existing vehicle
+  // ✅ load vehicle
   useEffect(() => {
     if (!id) return;
 
     apiGet<any>(`vehicles/${id}`)
-      .then(v => {
-        setBrand(v.brand);
-        setModel(v.model);
-        setFuelType(v.fuelType);
-        setLicensePlate(v.licensePlate);
-        setYear(v.year);
-        setEngineVolume(v.engineVolume);
+      .then((v) => {
+        setBrand(v.brand ?? "");
+        setModel(v.model ?? "");
+        setFuelType(v.fuelType ?? null);
+        setLicensePlate(v.licensePlate ?? "");
+        setYear(v.year ?? null);
+        setEngineVolume(v.engineVolume ?? null);
         setVin(v.vin ?? "");
+        console.log("response:", v);
       })
-      .catch(() => setError("Failed to load vehicle"))
+      .catch(() => setError(t("loadVehicleError")))
       .finally(() => setLoading(false));
   }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setError(null);
 
     if (!brand || !model || !fuelType || !licensePlate || !year) {
-      setError("Please fill all required fields");
+      setError(t("fillFields"));
       return;
     }
 
     if (vin && vin.length !== 17) {
-      setError("VIN must be exactly 17 characters");
+      setError(t("vinLength"));
       return;
     }
 
@@ -65,12 +70,12 @@ export function EditVehicle() {
         licensePlate,
         year,
         engineVolume,
-        vin
+        vin,
       });
 
       navigate("/vehicles");
     } catch (e: any) {
-      setError(e.message || "Failed to update");
+      setError(e.message || t("updateFailed"));
     }
   };
 
@@ -81,12 +86,10 @@ export function EditVehicle() {
   return (
     <div style={container}>
       <div style={card}>
-        <h2 style={{ textAlign: "center", marginBottom: 20 }}>
-          Edit Vehicle
-        </h2>
-
+        <h2 style={title}>{t("editVehicle")}</h2>
+        {error && <p style={errorStyle}>{error}</p>}
         <form onSubmit={handleSubmit}>
-          <Field label="Brand">
+          <Field label={t("brand")}>
             <input
               value={brand}
               onChange={(e) => setBrand(e.target.value)}
@@ -94,7 +97,7 @@ export function EditVehicle() {
             />
           </Field>
 
-          <Field label="Model">
+          <Field label={t("model")}>
             <input
               value={model}
               onChange={(e) => setModel(e.target.value)}
@@ -102,7 +105,7 @@ export function EditVehicle() {
             />
           </Field>
 
-          <Field label="Fuel Type">
+          <Field label={t("fuelType")}>
             <select
               value={fuelType ?? ""}
               onChange={(e) =>
@@ -113,16 +116,16 @@ export function EditVehicle() {
               style={input}
             >
               <option value="" disabled>
-                Choose fuel
+                {t("chooseFuel")}
               </option>
-              <option value={FuelType.Gasoline}>Gasoline</option>
-              <option value={FuelType.Diesel}>Diesel</option>
-              <option value={FuelType.Hybrid}>Hybrid</option>
-              <option value={FuelType.Electric}>Electric</option>
+              <option value={FuelType.Gasoline}>{t("gasoline")}</option>
+              <option value={FuelType.Diesel}>{t("diesel")}</option>
+              <option value={FuelType.Hybrid}>{t("hybrid")}</option>
+              <option value={FuelType.Electric}>{t("electric")}</option>
             </select>
           </Field>
 
-          <Field label="License Plate">
+          <Field label={t("licensePlate")}>
             <input
               value={licensePlate}
               onChange={(e) =>
@@ -132,7 +135,7 @@ export function EditVehicle() {
             />
           </Field>
 
-          <Field label="Production Year">
+          <Field label={t("productionYear")}>
             <input
               type="number"
               value={year ?? ""}
@@ -145,7 +148,7 @@ export function EditVehicle() {
             />
           </Field>
 
-          <Field label="Engine Volume (L)">
+          <Field label={t("engineVolume")}>
             <input
               type="number"
               value={engineVolume ?? ""}
@@ -158,7 +161,7 @@ export function EditVehicle() {
             />
           </Field>
 
-          <Field label="VIN (optional)">
+          <Field label={t("vinOptional")}>
             <input
               value={vin}
               onChange={(e) => setVin(normalize(e.target.value))}
@@ -166,20 +169,36 @@ export function EditVehicle() {
             />
           </Field>
 
-          <button type="submit" style={btn}>
-            Save Changes
-          </button>
+          {/* ✅ ACTIONS */}
+          <div style={actions}>
+            <button type="submit" style={btn}>
+              💾 {t("saveChanges")}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              style={cancelBtn}
+            >
+              ❌ {t("cancel")}
+            </button>
+          </div>
         </form>
 
-        {error && <p style={errorStyle}>{error}</p>}
       </div>
     </div>
   );
 }
 
-/* ✅ same Field + styles */
+/* ✅ FIELD */
 
-function Field({ label, children }: any) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div style={{ marginBottom: 16 }}>
       <div style={labelStyle}>{label}</div>
@@ -188,23 +207,30 @@ function Field({ label, children }: any) {
   );
 }
 
+/* ✅ STYLES */
+
 const container = {
   maxWidth: 420,
   margin: "0 auto",
-  padding: "60px 12px 100px"
+  padding: "60px 12px 100px",
 };
 
 const card = {
   background: "#1e293b",
   padding: 20,
   borderRadius: 16,
-  boxShadow: "0 10px 25px rgba(0,0,0,0.6)"
+  boxShadow: "0 10px 25px rgba(0,0,0,0.6)",
+};
+
+const title = {
+  textAlign: "center" as const,
+  marginBottom: 20,
 };
 
 const labelStyle = {
   fontSize: 14,
   marginBottom: 6,
-  opacity: 0.8
+  opacity: 0.8,
 };
 
 const input = {
@@ -214,25 +240,38 @@ const input = {
   border: "1px solid rgba(255,255,255,0.1)",
   background: "#0f172a",
   color: "white",
-  fontSize: 16
+  fontSize: 16,
+  boxSizing: "border-box" as const,
+};
+
+const actions = {
+  display: "flex",
+  gap: 10,
+  marginTop: 20,
 };
 
 const btn = {
-  width: "100%",
-  marginTop: 20,
+  flex: 1,
   padding: "14px",
   borderRadius: 12,
   border: "none",
   background: "linear-gradient(135deg, #3b82f6, #2563eb)",
   color: "white",
-  fontSize: 16,
   fontWeight: "bold",
-  cursor: "pointer"
+  cursor: "pointer",
+};
+
+const cancelBtn = {
+  flex: 1,
+  padding: "14px",
+  borderRadius: 12,
+  border: "none",
+  background: "#475569",
+  color: "white",
+  cursor: "pointer",
 };
 
 const errorStyle = {
   color: "#f87171",
-  marginTop: 12,
-  textAlign: "center"
+  textAlign: "center" as const,
 };
-

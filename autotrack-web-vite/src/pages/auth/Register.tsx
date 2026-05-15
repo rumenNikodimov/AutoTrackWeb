@@ -1,7 +1,8 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { apiPublicPost } from "../../services/api";
+import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 
 export function Register() {
   const navigate = useNavigate();
@@ -12,7 +13,9 @@ export function Register() {
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
+  const { t } = useTranslation();
+  const currentLang = i18n.language;
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -20,12 +23,12 @@ export function Register() {
 
     // ✅ VALIDATION
     if (!email || !password || !confirmPassword) {
-      setError("All fields are required");
+      setError(t("allFieldsRequired"));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError(t("passwordsNotMatch"));
       return;
     }
 
@@ -39,7 +42,7 @@ export function Register() {
 
       navigate("/login");
     } catch (err: any) {
-      setError(err.message || "Registration failed");
+      setError(t("registerFailed"));
     } finally {
       setLoading(false);
     }
@@ -47,12 +50,13 @@ export function Register() {
 
   return (
     <div style={container}>
+
       <div style={card}>
-        <h2 style={title}>Register</h2>
+        <h2 style={title}>{t("register")}</h2>
 
         <form onSubmit={handleSubmit}>
           {/* Email */}
-          <Field label="Email">
+          <Field label={t("email")}>
             <input
               type="email"
               value={email}
@@ -64,7 +68,7 @@ export function Register() {
           </Field>
 
           {/* Password */}
-          <Field label="Password">
+          <Field label={t("password")}>
             <input
               type="password"
               value={password}
@@ -75,7 +79,7 @@ export function Register() {
           </Field>
 
           {/* ✅ Confirm Password */}
-          <Field label="Confirm Password">
+          <Field label={t("confirmPassword")}>
             <input
               type="password"
               value={confirmPassword}
@@ -88,16 +92,16 @@ export function Register() {
           </Field>
 
           <button disabled={loading} style={btn}>
-            {loading ? "Registering..." : "Register"}
+            {loading ? t("registering") : t("register")}
           </button>
         </form>
 
         {error && <p style={errorStyle}>{error}</p>}
 
         <p style={footer}>
-          Already have an account?{" "}
+          {t("alreadyHaveAccount")}{" "}
           <Link to="/login" style={link}>
-            Login
+            {t("login")}  
           </Link>
         </p>
       </div>
