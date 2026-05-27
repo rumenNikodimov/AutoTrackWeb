@@ -119,7 +119,6 @@ export async function apiPost<T>(
   body: unknown
 ): Promise<T> {
   let token = getAccessToken();
-
   let response = await fetch(`${API_BASE_URL}/${url}`, {
     method: "POST",
     headers: {
@@ -214,7 +213,7 @@ debugger
 
 export async function apiPut<T>(url: string, body: unknown): Promise<T> {
   const token = getAccessToken();
-
+debugger;
   const response = await fetch(`${API_BASE_URL}/${url}`, {
     method: "PUT",
     headers: {

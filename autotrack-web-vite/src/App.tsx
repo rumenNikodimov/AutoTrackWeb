@@ -2,13 +2,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Login } from "./pages/auth/Login";
 import { Vehicles } from "./pages/vehicles/VehicleList";
-import { AddVehicle } from "./pages/vehicles/Addvehicle";
-import { FuelList } from "./pages/fuel/FuelList";
+import { AddVehicle } from "./pages/vehicles/AddVehicle";
+import { EntryList } from "./pages/vehicleEntry/EntryList";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { Register } from "./pages/auth/Register";
-import { AddFuel } from "./pages/fuel/AddFuel";
-import { EditFuel } from "./pages/fuel/EditFuel";
+import { AddEntry } from "./pages/vehicleEntry/AddEntry";
+import { EditEntry } from "./pages/vehicleEntry/EditEntry";
 import { Dashboard } from "./pages/dashboard/Dashboard";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { MobileNav } from "./components/MobileNav";
@@ -16,9 +16,9 @@ import { EditVehicle } from "./pages/vehicles/EditVehicle";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
 
 
-function FuelWrapper() {
+function EntryWrapper() {
   const { vehicleId } = useParams();
-  return <FuelList vehicleId={Number(vehicleId)} />;
+  return <EntryList vehicleId={Number(vehicleId)} />;
 }
 
 function App() {
@@ -70,16 +70,16 @@ function DashboardWrapper() {
           element={token ? <AddVehicle /> : <Navigate to="/login" />}/>
 
         <Route
-          path="/vehicles/:vehicleId/fuel"
-          element={token ? <FuelWrapper /> : <Navigate to="/login" />}/>
+          path="/vehicles/:vehicleId/entries"
+          element={token ? <EntryWrapper /> : <Navigate to="/login" />}/>
 
         <Route 
-          path="/vehicles/:vehicleId/fuel/add" 
-          element={<AddFuel />} />
+          path="/vehicles/:vehicleId/entries/add" 
+          element={<AddEntry />} />
 
         <Route 
-          path="/fuel/edit/:id" 
-          element={<EditFuel />} />
+          path="/entries/edit/:id" 
+          element={<EditEntry />} />
 
         
         <Route
@@ -106,7 +106,7 @@ function DashboardWrapper() {
 export default App;
 
 //Styles
-const topBar = {
+const topBar: React.CSSProperties = {
   position: "fixed",
   top: 10,
   right: 10,

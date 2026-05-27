@@ -2,14 +2,16 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
+const savedLang = localStorage.getItem("lang") || "en";
+
 i18n.use(initReactI18next).init({
   resources: {
     en: {
       translation: {
         vehicles: "My Vehicles",
         dashboard: "Dashboard",
-        addFuel: "Add fuel",
-        fuelLog: "Fuel log",
+        addEntry: "Add entry",
+        entryLog: "Entry log",
         edit: "Edit",
         delete: "Delete",
         loading: "Loading...",
@@ -52,6 +54,7 @@ i18n.use(initReactI18next).init({
         licensePlate: "License Plate",
         productionYear: "Production Year",
         engineVolume: "Engine Volume (L)",
+        vin: "VIN",
         vinOptional: "VIN (optional)",
         saveChanges: "Save Changes",
         cancel: "Cancel",
@@ -66,13 +69,55 @@ i18n.use(initReactI18next).init({
         editEntry: "Edit Entry",
         energyType: "Energy Type",
         odometer: "Odometer (km)",
-        fuelAmount: "Fuel (liters)",
+        amount: "Fuel (liters)",
         energy: "Energy (kWh)",
         fuelPrice: "Fuel price",
         electricPrice: "Electricity price",
         pricePerUnit: "Price per unit",
         save: "Save",
-        loadFuelError: "Failed to load fuel entry"
+        loadFuelError: "Failed to load fuel entry",
+        totalPrice: "Total price",
+        fuelDropdown: "⛽ Fuel",
+        electricDropdown:"⚡ Electric",
+        expenseDropdown:"💸 Expense",
+        serviceDropdown: "🔧 Service",
+        insuranceDropdown: "🛡 Insurance",
+        vignetteDropdown: "🛣 Vignette",
+        choose: "Choose",
+        type: "Type",
+        title: "Title",
+        description: "Description",
+        startDate: "Start Date",
+        endDate: "End Date",
+        nextDueKm: "Next due (km)",
+        nextDueDate: "Next due (date)",
+        category: "Category",
+        serviceType: "Service Type",
+        EngineOilChange: "Oil change",
+        TransmissionOilChange: "Transmission oil change",
+        Inspection: "Inspection",
+        Repair: "Repair",
+        TireChange: "Tire change",
+        BrakeService: "Brake service",
+        FilterChange: "Filter change",
+        BatteryReplacement: "Battery replacement",
+       
+        insuranceType: "Insurance type",
+        CivilLiability: "Civil liability",
+        Casco: "Casco",
+        GreenCard: "Green card",
+        Travel: "Travel insurance",
+
+        expenseCategory: "Expense category",
+        Insurance: "Insurance",
+        Service: "Service",
+        Parking: "Parking",
+        Toll: "Toll",
+        CarWash: "Car Wash",
+        Accessories: "Accessories",
+        Fine: "Fine",
+
+        Other: "Other",        
 
       }
     },
@@ -80,8 +125,8 @@ i18n.use(initReactI18next).init({
       translation: {
         vehicles: "Моите коли",
         dashboard: "Табло",
-        addFuel: "Добави гориво",
-        fuelLog: "Зареждания",
+        addEntry: "Добави запис",
+        entryLog: "История на записите",
         edit: "Редактирай",
         delete: "Изтрий",
         loading: "Зареждане...",
@@ -123,8 +168,9 @@ i18n.use(initReactI18next).init({
         electric: "Електрически",
         licensePlate: "Регистрационен номер",
         productionYear: "Година",
-        engineVolume: "Обем (L)",
+        engineVolume: "Обем на двигателя (L)",
         vinOptional: "VIN (по избор)",
+        vin: "VIN",
         saveChanges: "Запази промените",
         cancel: "Отказ",
 
@@ -138,24 +184,72 @@ i18n.use(initReactI18next).init({
         editEntry: "Редакция на запис",
         energyType: "Тип енергия",
         odometer: "Километри",
-        fuelAmount: "Гориво (литри)",
+        amount: "Гориво (литри)",
         energy: "Енергия (kWh)",
         fuelPrice: "Цена на гориво",
         electricPrice: "Цена на ток",
         pricePerUnit: "Цена за единица",
         save: "Запази",
-        loadFuelError: "Грешка при зареждане"
+        loadFuelError: "Грешка при зареждане",
+        totalPrice: "Обща цена",  
 
+        fuelDropdown: "⛽ Гориво",
+        electricDropdown:"⚡ Електричество",
+        expenseDropdown:"💸 Разход",
+        serviceDropdown: "🔧 Услуги",
+        insuranceDropdown: "🛡 Застраховка",
+        vignetteDropdown: "🛣  Винетка",
+        choose: "Избери",
+        type: "Тип",
+        title: "Заглавие",
+        description: "Описание",
+        startDate: "Начална дата",
+        endDate: "Крайна дата",
+        nextDueKm: "Следваща (км)",
+        nextDueDate: "Следваща (дата)",
+        category: "Категория",
+        serviceType: "Тип услуга",
+        
+      
+        EngineOilChange: "Смяна на масло",
+        TransmissionOilChange: "Смяна на трансмисионно масло",
+        Inspection: "Преглед",
+        Repair: "Ремонт",
+        TireChange: "Смяна на гуми",
+        BrakeService: "Спирачна система",
+        FilterChange: "Смяна на филтри",
+        BatteryReplacement: "Смяна на акумулатор",
+
+        insuranceType: "Тип застраховка",
+        CivilLiability: "Гражданска отговорност",
+        Casco: "Каско",
+        GreenCard: "Зелена карта",
+        Travel: "Застраховка 'Пътуване'",
+
+        expenseCategory: "Категория разход",
+        Insurance: "Застраховка",
+        Service: "Услуги",
+        Parking: "Паркиране",
+        Toll: "Тол такса",
+        CarWash: "Автомивка",
+        Accessories: "Аксесоари",
+        Fine: "Фини",
+
+        Other: "Друго",
       }
     }
   },
 
-  lng: "en", // default
-  fallbackLng: "en",
+  lng: savedLang,
+    fallbackLng: "en",
 
-  interpolation: {
-    escapeValue: false
-  }
+    interpolation: {
+      escapeValue: false
+    }
+  });
+
+  i18n.on("languageChanged", (lng) => {
+    localStorage.setItem("lang", lng);
 });
 
 export default i18n;

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { apiPublicPost } from "../../services/api";
 import { useTranslation } from "react-i18next";
-import i18n from "../../i18n";
 
 export function Register() {
   const navigate = useNavigate();
@@ -14,7 +13,7 @@ export function Register() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
-  const currentLang = i18n.language;
+  // const currentLang = i18n.language;
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

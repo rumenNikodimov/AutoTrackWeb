@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { apiPost } from "../../services/api";
 import { FuelType } from "../../types/enums/FuelType";
 import { createHoverHandlers } from "../../utils/uiHandlers";
+import { useTranslation } from "react-i18next";
 
 export function AddVehicle() {
   const navigate = useNavigate();
@@ -26,6 +27,8 @@ export function AddVehicle() {
       .replace(/\s/g, "");
   }
 
+  const { t } = useTranslation();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -42,17 +45,21 @@ export function AddVehicle() {
       return;
     }
 
+    
+
     setLoading(true);
 
     try {
       await apiPost("vehicles", {
-        brand,
-        model,
-        fuelType,
-        licensePlate,
-        year,
-        engineVolume,
-        vin
+        request: {
+          brand,
+          model,
+          fuelType,
+          licensePlate,
+          year,
+          engineVolume,
+          vin
+        }
       });
 
       navigate("/vehicles");
@@ -77,7 +84,7 @@ export function AddVehicle() {
         </h2>
 
         <form onSubmit={handleSubmit}>
-          <Field label="Brand">
+          <Field label={t("brand")}>
             <input
               value={brand}
               onChange={(e) => setBrand(e.target.value)}
@@ -86,7 +93,7 @@ export function AddVehicle() {
             />
           </Field>
 
-          <Field label="Model">
+          <Field label={t("model")}>
             <input
               value={model}
               onChange={(e) => setModel(e.target.value)}
@@ -95,7 +102,7 @@ export function AddVehicle() {
             />
           </Field>
 
-          <Field label="Fuel Type">
+          <Field label={t("fuelType")}>
             <select
               value={fuelType ?? ""}
               onChange={(e) =>
@@ -106,7 +113,7 @@ export function AddVehicle() {
               style={input}
             >
               <option value="" disabled>
-                Choose fuel
+                {t("chooseFuel")}
               </option>
               <option value={FuelType.Gasoline}>Gasoline</option>
               <option value={FuelType.Diesel}>Diesel</option>
@@ -116,7 +123,7 @@ export function AddVehicle() {
           </Field>
 
           {/* ✅ LICENSE PLATE */}
-          <Field label="License Plate">
+          <Field label={t("licensePlate")}>
             <input
               value={licensePlate}
               onChange={(e) =>
@@ -127,7 +134,7 @@ export function AddVehicle() {
             />
           </Field>
 
-          <Field label="Production Year">
+          <Field label={t("productionYear")}>
             <input
               type="number"
               value={year ?? ""}
@@ -140,7 +147,7 @@ export function AddVehicle() {
             />
           </Field>
 
-          <Field label="Engine Volume (L)">
+          <Field label={t("engineVolume")}>
             <input
               type="number"
               value={engineVolume ?? ""}
@@ -154,7 +161,7 @@ export function AddVehicle() {
           </Field>
 
           {/* ✅ VIN */}
-          <Field label="VIN (optional)">
+          <Field label={t("vin")}>
             <input
               value={vin}
               onChange={(e) => setVin(normalize(e.target.value))}
@@ -195,20 +202,20 @@ function Field({
 
 /* ✅ Styles */
 
-const card = {
+const card: React.CSSProperties = {
   background: "#1e293b",
   padding: 20,
   borderRadius: 16,
   boxShadow: "0 10px 25px rgba(0,0,0,0.6)"
 };
 
-const labelStyle = {
+const labelStyle: React.CSSProperties = {
   fontSize: 14,
   marginBottom: 6,
   opacity: 0.8
 };
 
-const input = {
+const input: React.CSSProperties = {
   width: "100%",
   padding: "12px 16px",
   borderRadius: 12,
@@ -219,7 +226,7 @@ const input = {
   boxSizing: "border-box"
 };
 
-const btn = {
+const btn: React.CSSProperties = {
   width: "100%",
   marginTop: 20,
   padding: "14px",
@@ -232,7 +239,7 @@ const btn = {
   cursor: "pointer"
 };
 
-const errorStyle = {
+const errorStyle: React.CSSProperties = {
   color: "#f87171",
   marginTop: 12,
   textAlign: "center"

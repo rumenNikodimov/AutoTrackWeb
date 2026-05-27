@@ -55,10 +55,10 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
           style={secondaryBtn}
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/vehicles/${vehicle.id}/fuel/add`)
+            navigate(`/vehicles/${vehicle.id}/entries/add`)
           }}
         >
-          ➕ {t("addFuel")} 
+          ➕ {t("addEntry")} 
         </button>
       </div>
 
@@ -70,10 +70,10 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
           style={secondaryBtn}
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/vehicles/${vehicle.id}/fuel`);
+            navigate(`/vehicles/${vehicle.id}/entries`);
           }}
         >
-          ⛽ {t("fuelLog")}       
+          ⛽ {t("entryLog")}       
         </button>
 
         
@@ -155,11 +155,11 @@ const baseBtn: React.CSSProperties = {
   transition: "all 0.2s"
 };
 
-const primaryBtn: React.CSSProperties = {
-  ...baseBtn,
-  background: "linear-gradient(135deg, #3b82f6, #2563eb)",
-  color: "white"
-};
+// const primaryBtn: React.CSSProperties = {
+//   ...baseBtn,
+//   background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+//   color: "white"
+// };
 
 const secondaryBtn: React.CSSProperties = {
   ...baseBtn,

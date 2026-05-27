@@ -44,7 +44,7 @@ function calculateConsumptions(entries: FuelEntry[]) {
   return result;
 }
 
-export function FuelList({ vehicleId }: Props) {
+export function EntryList({ vehicleId }: Props) {
   const navigate = useNavigate();
 
   const [entries, setEntries] = useState<FuelEntry[]>([]);
@@ -52,7 +52,7 @@ export function FuelList({ vehicleId }: Props) {
 
   const { t } = useTranslation();
   useEffect(() => {
-    apiGet<FuelEntry[]>(`fuel/vehicle/${vehicleId}`)
+    apiGet<FuelEntry[]>(`entries/vehicle/${vehicleId}`)
       .then(setEntries)
       .finally(() => setLoading(false));
   }, [vehicleId]);
@@ -60,7 +60,7 @@ export function FuelList({ vehicleId }: Props) {
   const handleDelete = async (id: number) => {
     if (!confirm(t("deleteEntry"))) return;
 
-    await apiDelete(`fuel/${id}`);
+    await apiDelete(`entries/${id}`);
     setEntries(prev => prev.filter(e => e.id !== id));
   };
 
@@ -102,7 +102,7 @@ export function FuelList({ vehicleId }: Props) {
 
           {/* ✅ ACTIONS */}
           <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
-            <AnimatedBtn onClick={() => navigate(`/fuel/edit/${e.id}`)}>
+            <AnimatedBtn onClick={() => navigate(`/entries/edit/${e.id}`)}>
               ✏️
             </AnimatedBtn>
 
@@ -116,7 +116,7 @@ export function FuelList({ vehicleId }: Props) {
       {/* ✅ FLOATING BUTTON */}
       <button
         onClick={() =>
-          navigate(`/vehicles/${vehicleId}/fuel/add`)
+          navigate(`/vehicles/${vehicleId}/entries/add`)
         }
         {...createHoverHandlers("rgba(59,130,246,0.6)")}
         style={{
