@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 export function AddEntry() {
   const navigate = useNavigate();
   const { vehicleId } = useParams();
+  
 
   const { t } = useTranslation();
   
