@@ -1,8 +1,8 @@
 export const EntryType = {
-    Fuel: 1,
-    Electric: 2,
-    Expense: 3,
-    Service: 4,
-    Insurance: 5,
-    Vignette: 6,
+    FuelType: 1,
+    ElectricType: 2,
+    ExpenseType: 3,
+    ServiceType: 4,
+    InsuranceType: 5,
+    VignetteType: 6,
 } as const;

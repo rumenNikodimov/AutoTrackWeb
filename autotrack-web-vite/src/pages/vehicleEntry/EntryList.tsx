@@ -1,17 +1,18 @@
-
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { apiGet, apiDelete } from "../../services/api";
 import { createHoverHandlers } from "../../utils/uiHandlers";
 import { useTranslation } from "react-i18next";
+import { EntryType } from "../../types/enums/EntryType";
 
-type FuelEntry = {
+type Entry = {
   id: number;
   vehicleId: number;
   odometerKm: number;
-  fuelAmount: number;
+  amount: number;
   totalPrice: number;
-  filledAt: string;
+  occurredAt: string;
+  type: number;
 };
 
 type Props = {
@@ -19,7 +20,7 @@ type Props = {
 };
 
 // ✅ consumption logic (същото)
-function calculateConsumptions(entries: FuelEntry[]) {
+function calculateConsumptions(entries: Entry[]) {
   const result: any[] = [];
 
   for (let i = 1; i < entries.length; i++) {
@@ -30,7 +31,7 @@ function calculateConsumptions(entries: FuelEntry[]) {
 
     if (distance <= 0) continue;
 
-    const consumption = (curr.fuelAmount / distance) * 100;
+    const consumption = (curr.amount / distance) * 100;
 
     result.push({
       id: curr.id,
@@ -47,12 +48,12 @@ function calculateConsumptions(entries: FuelEntry[]) {
 export function EntryList({ vehicleId }: Props) {
   const navigate = useNavigate();
 
-  const [entries, setEntries] = useState<FuelEntry[]>([]);
+  const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
 
   const { t } = useTranslation();
   useEffect(() => {
-    apiGet<FuelEntry[]>(`entries/vehicle/${vehicleId}`)
+    apiGet<Entry[]>(`entries/vehicle/${vehicleId}`)
       .then(setEntries)
       .finally(() => setLoading(false));
   }, [vehicleId]);
@@ -70,11 +71,17 @@ export function EntryList({ vehicleId }: Props) {
 
   const consumptions = calculateConsumptions(sorted);
 
+  
+  const getEntryTypeKey = (value: number) =>
+    Object.keys(EntryType).find(
+      (k) => EntryType[k as keyof typeof EntryType] === value
+  );
+
   if (loading) return <p style={{ padding: 20 }}>Loading...</p>;
 
   return (
     <div style={{ maxWidth: 600, margin: "20px auto", padding: 10 }}>
-      <h2 style={{ textAlign: "center" }}>{t("fuelEntries")}</h2>
+      <h2 style={{ textAlign: "center" }}>{t("entries")}</h2>
 
       {/* ✅ LIST */}
       {sorted.map((e, i) => (
@@ -89,15 +96,25 @@ export function EntryList({ vehicleId }: Props) {
             animationDelay: `${i * 0.05}s`
           }}
         >
+          <span>
+            {t(getEntryTypeKey(e.type) || "")}
+          </span>
+
           <div>
-            <strong>{e.odometerKm} km</strong>
+            {e.type !== EntryType.InsuranceType && e.type !== EntryType.VignetteType
+              ? (
+                <strong>{e.odometerKm} km</strong>
+              )
+              : null}
             <div style={{ fontSize: 13, opacity: 0.7 }}>
-              {new Date(e.filledAt).toLocaleDateString()}
+              {new Date(e.occurredAt).toLocaleDateString()}
             </div>
           </div>
-
+          
           <div style={{ marginTop: 5 }}>
-            ⛽ {e.fuelAmount} L • 💰 {e.totalPrice.toFixed(2)} {t("currency")}
+            {e.type === EntryType.ElectricType ? "⚡" : "⛽"}{" "}
+            {e.amount} {e.type === EntryType.ElectricType ? "kWh" : "L"} • 💰{" "}
+            {e.totalPrice.toFixed(2)} {t("currency")}
           </div>
 
           {/* ✅ ACTIONS */}

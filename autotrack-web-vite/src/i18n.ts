@@ -1,4 +1,3 @@
-
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
@@ -77,12 +76,12 @@ i18n.use(initReactI18next).init({
         save: "Save",
         loadFuelError: "Failed to load fuel entry",
         totalPrice: "Total price",
-        fuelDropdown: "⛽ Fuel",
-        electricDropdown:"⚡ Electric",
-        expenseDropdown:"💸 Expense",
-        serviceDropdown: "🔧 Service",
-        insuranceDropdown: "🛡 Insurance",
-        vignetteDropdown: "🛣 Vignette",
+        FuelType: "⛽ Fuel",
+        ElectricType:"⚡ Electric",
+        ExpenseType:"💸 Expense",
+        ServiceType: "🔧 Service",
+        InsuranceType: "🛡 Insurance",
+        VignetteType : "🛣 Vignette",
         choose: "Choose",
         type: "Type",
         title: "Title",
@@ -193,12 +192,12 @@ i18n.use(initReactI18next).init({
         loadFuelError: "Грешка при зареждане",
         totalPrice: "Обща цена",  
 
-        fuelDropdown: "⛽ Гориво",
-        electricDropdown:"⚡ Електричество",
-        expenseDropdown:"💸 Разход",
-        serviceDropdown: "🔧 Услуги",
-        insuranceDropdown: "🛡 Застраховка",
-        vignetteDropdown: "🛣  Винетка",
+        FuelType: "⛽ Гориво",
+        ElectricType:"⚡ Електричество",
+        ExpenseType:"💸 Разход",
+        ServiceType: "🔧 Услуги",
+        InsuranceType: "🛡 Застраховка",
+        VignetteType : "🛣  Винетка",
         choose: "Избери",
         type: "Тип",
         title: "Заглавие",

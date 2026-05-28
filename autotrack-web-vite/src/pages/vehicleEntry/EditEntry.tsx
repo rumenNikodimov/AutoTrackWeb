@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiGet, apiPut } from "../../services/api";
@@ -37,12 +36,12 @@ export function EditEntry() {
 
   const [error, setError] = useState<string | null>(null);
 
-  const isFuel = type === EntryType.Fuel;
-  const isElectric = type === EntryType.Electric;
-  const isExpense = type === EntryType.Expense;
-  const isService = type === EntryType.Service;
-  const isInsurance = type === EntryType.Insurance;
-  const isVignette = type === EntryType.Vignette;
+  const isFuel = type === EntryType.FuelType;
+  const isElectric = type === EntryType.ElectricType;
+  const isExpense = type === EntryType.ExpenseType;
+  const isService = type === EntryType.ServiceType;
+  const isInsurance = type === EntryType.InsuranceType;
+  const isVignette = type === EntryType.VignetteType;
 
   useEffect(() => {
     loadEntry();
@@ -57,9 +56,9 @@ export function EditEntry() {
       setTotalPrice(data.totalPrice);
       setOdometerKm(data.odometerKm ?? null);
 
-      setCategory(data.expenseCategory ?? null);
-      setServiceType(data.serviceType ?? null);
-      setInsuranceType(data.insuranceType ?? null);
+      setCategory(data.expenseCategory ?? null ? Number(data.expenseCategory) : null);
+      setServiceType(data.serviceType ?? null ? Number(data.serviceType) : null);
+      setInsuranceType(data.insuranceType ?? null ? Number(data.insuranceType) : null);
 
       setTitle(data.title ?? "");
       setDescription(data.description ?? "");
@@ -69,22 +68,14 @@ export function EditEntry() {
 
       setNextDueKm(data.nextDueKm ?? null);
       setNextDueDate(data.nextDueDate?.split("T")[0] ?? "");
+      console.log(data.expenseCategory);
+
     } catch (e: any) {
       setError(e.message);
     } finally {
       setLoading(false);
     }
   };
-
-  const getInputStyle = (invalid?: boolean): React.CSSProperties => ({
-    width: "100%",
-    padding: "12px 16px",
-    borderRadius: 12,
-    background: "#0f172a",
-    color: "white",
-    border: invalid ? "2px solid #ef4444" : "1px solid rgba(255,255,255,0.1)",
-    boxSizing: "border-box"
-  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,34 +112,43 @@ return (
 
         <form onSubmit={handleSubmit} style={{ width: "100%" }}>
           
-          {/* <Field label={t("type")}>
+          <Field label={t("type")}>
             <select
               value={type || ""}
               onChange={(e) => setType(Number(e.target.value))}
               style={getInputStyle(type === 0)}
             >
               <option value="">{t("choose")}</option>
-              <option value={EntryType.Fuel}> {t("fuelDropdown")}</option>
-              <option value={EntryType.Electric}> {t("electricDropdown")}</option>
-              <option value={EntryType.Expense}> {t("expenseDropdown")}</option>
-              <option value={EntryType.Service}> {t("serviceDropdown")}</option>
-              <option value={EntryType.Insurance}> {t("insuranceDropdown")}</option>
-              <option value={EntryType.Vignette}> {t("vignetteDropdown")}</option>
+              <option value={EntryType.FuelType}> {t("FuelType")}</option>
+              <option value={EntryType.ElectricType}> {t("ElectricType")}</option>
+              <option value={EntryType.ExpenseType}> {t("ExpenseType")}</option>
+              <option value={EntryType.ServiceType}> {t("ServiceType")}</option>
+              <option value={EntryType.InsuranceType}> {t("InsuranceType")}</option>
+              <option value={EntryType.VignetteType}> {t("VignetteType")}</option>
             </select>
-          </Field> */}
+          </Field>
 
-            <Field label={t("type")}>
-              <select
-                value={category ?? ""}
-                onChange={(e) => setType(Number(e.target.value))}
-                style={getInputStyle(type === 0)}
-              >
-                <option value="">{t("choose")}</option>
-                {Object.entries(EntryType).map(([k, v]) => (
-                  <option key={k} value={v}>{t(k)}</option>
-                ))}
-              </select>
-            </Field>
+             {/* <Field label={t("type")}>
+                        <select
+                          value={type ?? ""}
+                          onChange={(e) =>
+                            setType(
+                              e.target.value === "" ? null : Number(e.target.value)
+                            )
+                          }
+                          style={getInputStyle(type === null)}
+                        >
+                          <option value="">{t("choose")}</option>
+            
+                          {Object.entries(EntryType)
+                            .filter(([k]) => isNaN(Number(k)))
+                            .map(([k, v]) => (
+                              <option key={k} value={v}>
+                                {t(k)}
+                              </option>
+                            ))}
+                        </select>
+                      </Field> */}
           
           {(isFuel || isElectric || isService) && (
             <Field label={t("odometer")}>
@@ -162,7 +162,7 @@ return (
           )}
 
           {(isFuel || isElectric) && (
-            <Field label={t("amount")}>
+            <Field label={isElectric ? t("energy") : t("amount")}>
               <input
                 type="number"
                 value={amount ?? ""}
@@ -187,17 +187,26 @@ return (
             </Field>
           )}
 
-          {(isExpense) && (
+          {isExpense && (
             <Field label={t("expenseCategory")}>
               <select
                 value={category ?? ""}
-                onChange={(e) => setCategory(Number(e.target.value))}
-                style={getInputStyle()}
+                onChange={(e) =>
+                  setCategory(
+                    e.target.value === "" ? null : Number(e.target.value)
+                  )
+                }
+                style={getInputStyle(category === null)}
               >
                 <option value="">{t("choose")}</option>
-                {Object.entries(ExpenseCategory).map(([k, v]) => (
-                  <option key={k} value={v}>{t(k)}</option>
-                ))}
+
+                {Object.entries(ExpenseCategory)
+                  .filter(([k]) => isNaN(Number(k)))
+                  .map(([k, v]) => (
+                    <option key={k} value={v}>
+                      {t(k)}
+                    </option>
+                  ))}
               </select>
             </Field>
           )}
@@ -390,3 +399,13 @@ const errorText: React.CSSProperties = {
   color: "#ef4444",
   marginTop: 10
 };
+
+const getInputStyle = (invalid?: boolean): React.CSSProperties => ({
+    width: "100%",
+    padding: "12px 16px",
+    borderRadius: 12,
+    background: "#0f172a",
+    color: "white",
+    border: invalid ? "2px solid #ef4444" : "1px solid rgba(255,255,255,0.1)",
+    boxSizing: "border-box"
+  });

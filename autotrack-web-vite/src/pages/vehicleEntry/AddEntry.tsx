@@ -34,12 +34,12 @@ export function AddEntry() {
 
   const [error, setError] = useState<string | null>(null);
 
-  const isFuel = type === EntryType.Fuel;
-  const isElectric = type === EntryType.Electric;
-  const isExpense = type === EntryType.Expense;
-  const isService = type === EntryType.Service;
-  const isInsurance = type === EntryType.Insurance;
-  const isVignette = type === EntryType.Vignette;
+  const isFuel = type === EntryType.FuelType;
+  const isElectric = type === EntryType.ElectricType;
+  const isExpense = type === EntryType.ExpenseType;
+  const isService = type === EntryType.ServiceType;
+  const isInsurance = type === EntryType.InsuranceType;
+  const isVignette = type === EntryType.VignetteType;
 
   if (!vehicleId) return <p>Invalid vehicle</p>;
 
@@ -88,19 +88,30 @@ export function AddEntry() {
         <h2 style={titleStyle}>Add Entry</h2>
 
         <form onSubmit={handleSubmit} style={{ width: "100%" }}>
-          
-         <Field label={t("type")}>
+         
+           
+          <Field label={t("type")}>
             <select
-              value={category ?? ""}
-              onChange={(e) => setType(Number(e.target.value))}
-              style={getInputStyle(type === 0)}
+              value={type ?? ""}
+              onChange={(e) =>
+                setType(
+                  e.target.value === "" ? 0 : Number(e.target.value)
+                )
+              }
+              style={getInputStyle(type === null)}
             >
               <option value="">{t("choose")}</option>
-              {Object.entries(EntryType).map(([k, v]) => (
-                <option key={k} value={v}>{t(k)}</option>
-              ))}
+
+              {Object.entries(EntryType)
+                .filter(([k]) => isNaN(Number(k)))
+                .map(([k, v]) => (
+                  <option key={k} value={v}>
+                    {t(k)}
+                  </option>
+                ))}
             </select>
           </Field>
+
           
           {(isFuel || isElectric || isService) && (
             <Field label={t("odometer")}>
@@ -115,7 +126,7 @@ export function AddEntry() {
 
 
           {(isFuel || isElectric) && (
-            <Field label={t("amount")}>
+           <Field label={isElectric ? t("energy") : t("amount")}>
               <input
                 type="number"
                 value={amount ?? ""}
@@ -124,7 +135,8 @@ export function AddEntry() {
               />
             </Field>
           )}
-          
+
+          {(isFuel || isElectric || isService || isExpense || isInsurance || isVignette) && (
           <Field label={t("totalPrice")}>
             <input
               type="number"
@@ -133,6 +145,7 @@ export function AddEntry() {
               style={getInputStyle()}
             />
           </Field>
+          )}
 
           {(isExpense) && (
             <Field label={t("expenseCategory")}>
