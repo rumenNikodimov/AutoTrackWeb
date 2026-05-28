@@ -2,7 +2,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Login } from "./pages/auth/Login";
 import { Vehicles } from "./pages/vehicles/VehicleList";
-import { AddVehicle } from "./pages/vehicles/AddVehicle";
+import { AddVehicle } from "./pages/vehicles/Addvehicle";
 import { EntryList } from "./pages/vehicleEntry/EntryList";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
