@@ -48,10 +48,8 @@ export function AddVehicle() {
     
 
     setLoading(true);
-
     try {
       await apiPost("vehicles", {
-        request: {
           brand,
           model,
           fuelType,
@@ -59,7 +57,6 @@ export function AddVehicle() {
           year,
           engineVolume,
           vin
-        }
       });
 
       navigate("/vehicles");
