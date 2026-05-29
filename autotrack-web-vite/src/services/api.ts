@@ -4,7 +4,10 @@
 //const API_BASE_URL = "https://localhost:7071/api";
 //const API_BASE_URL = "http://192.168.1.3:7071/api";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ?? "https://autotrack-api.onrender.com";
+
 
 /* ================= STATE ================= */
 
