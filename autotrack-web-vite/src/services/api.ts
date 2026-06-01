@@ -8,7 +8,7 @@
 // const API_BASE_URL =
 //   import.meta.env.VITE_API_URL ?? "https://autotrack-api.onrender.com";
 
-const API_BASE_URL = "https://autotrackapi1.onrender.com";
+const API_BASE_URL = "https://autotrackapi1.onrender.com/api";
 
 
 
