@@ -4,7 +4,6 @@ import { apiPost } from "../../services/api";
 import { useNavigate, Link } from "react-router-dom";
 import { createHoverHandlers } from "../../utils/uiHandlers";
 import { useTranslation } from "react-i18next";
-//import i18n from "../../i18n";
 
 type Props = {
   onLogin: (token: string) => void;
@@ -14,7 +13,7 @@ type Props = {
 export function Login({ onLogin }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 

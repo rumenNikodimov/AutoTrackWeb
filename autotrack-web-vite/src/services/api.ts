@@ -10,7 +10,7 @@
 
 const API_BASE_URL = "https://autotrackapi1.onrender.com/api";
 
-
+alert(`API BASE URL: ${API_BASE_URL}`);
 
 /* ================= STATE ================= */
 
