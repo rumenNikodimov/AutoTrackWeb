@@ -2,10 +2,11 @@ import axios from "axios";
 
 //const API_BASE_URL = "http://localhost:5265/api";
 //const API_BASE_URL = "http://192.168.1.3:5265/api";
-//const API_BASE_URL = "https://localhost:7071/api";
+//const API_BASE_URL = "https://localhost:7071/api"; //Локален SSL (може да има проблеми с сертификата в браузъра)
 //const API_BASE_URL = "http://192.168.1.3:7071/api";
 
 const API_BASE_URL = "https://autotrackapi1.onrender.com/api";
+//const API_BASE_URL = "https://autotrackapi.onrender.com/api";
 
 //alert(`API BASE URL: ${API_BASE_URL}`);
 
@@ -55,29 +56,33 @@ export async function apiDelete(url: string): Promise<void> {
 
 /* ================= AUTO REFRESH (OPTIONAL, BUT PRO LEVEL) ================= */
 
+
 api.interceptors.response.use(
-  response => response,
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // ✅ ако access token е изтекъл
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (!originalRequest) return Promise.reject(error);
+
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes("auth/refresh") &&
+      !originalRequest.url.includes("auth/login")
+    ) {
       originalRequest._retry = true;
 
       try {
-        // ✅ refresh cookie-based (няма body)
         await api.post("auth/refresh");
-
-        // ✅ retry оригиналната заявка
         return api(originalRequest);
       } catch {
-        // ❌ ако refresh fail → logout
-        window.location.href = "/login";
+        return Promise.reject(error); // ✅ FIX
       }
     }
 
     return Promise.reject(error);
   }
 );
+
 
 
