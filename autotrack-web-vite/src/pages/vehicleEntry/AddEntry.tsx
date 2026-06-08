@@ -12,7 +12,6 @@ export function AddEntry() {
   const navigate = useNavigate();
   const { vehicleId } = useParams();
   
-
   const { t } = useTranslation();
   
   const [type, setType] = useState<number>(0);
@@ -58,28 +57,32 @@ export function AddEntry() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const payload: any = {
+      vehicleId: Number(vehicleId),
+      entryType: type,
+      totalPrice,
+      odometerKm,
+      expenseCategory: category,
+      serviceType,
+      insuranceType,
+      title,
+      description,
+      startDate: startDate || null,
+      endDate: endDate || null,
+      nextDueKm,
+      nextDueDate: nextDueDate || null
+    };
+
+    // ✅ добавяме amount само ако е валиден
+    if (amount !== null && !isNaN(amount)) {
+      payload.amount = amount;
+    }
 
     try {
-      await apiPost("entries", {
-        vehicleId: Number(vehicleId),
-        entryType: type,
-        amount,
-        totalPrice,
-        odometerKm,
-        expenseCategory: category,
-        serviceType,
-        insuranceType,
-        title,
-        description,
-        startDate: startDate || null,
-        endDate: endDate || null,
-        nextDueKm,
-        nextDueDate: nextDueDate || null
-      });
-
-      navigate(-1);
+        await apiPost("entries", payload);
+        navigate(-1);
     } catch (e: any) {
-      setError(e.message);
+        setError(e.message);
     }
   };
 
@@ -131,7 +134,13 @@ export function AddEntry() {
               <input
                 type="number"
                 value={amount ?? ""}
-                onChange={(e) => setAmount(Number(e.target.value))}
+                step="0.01"
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  setAmount(value === "" ? null : parseFloat(value.replace(",", ".")));
+                }}
+
                 style={getInputStyle()}
               />
             </Field>
@@ -141,8 +150,9 @@ export function AddEntry() {
           <Field label={t("totalPrice")}>
             <input
               type="number"
+              step="0.01"
               value={totalPrice ?? ""}
-              onChange={(e) => setTotalPrice(Number(e.target.value))}
+              onChange={(e) => setTotalPrice(parseFloat(e.target.value.replace(",", ".")))}
               style={getInputStyle()}
             />
           </Field>
@@ -231,7 +241,11 @@ export function AddEntry() {
               <input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setEndDate(value);
+                  setNextDueDate(value);
+                }}
                 style={getInputStyle()}
               />
             </Field>

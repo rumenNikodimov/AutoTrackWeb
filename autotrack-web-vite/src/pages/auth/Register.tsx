@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { apiPublicPost } from "../../services/api";
+//import { apiPost, apiPublicPost } from "../../services/api";
 import { useTranslation } from "react-i18next";
 
 export function Register() {
@@ -34,7 +34,7 @@ export function Register() {
     setLoading(true);
 
     try {
-      await apiPublicPost("auth/register", {
+      await apiPost("auth/register", {
         email: email.trim(),
         password
       });

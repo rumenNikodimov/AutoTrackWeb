@@ -6,9 +6,8 @@ import { createHoverHandlers } from "../../utils/uiHandlers";
 import { useTranslation } from "react-i18next";
 
 type Props = {
-  onLogin: (token: string) => void;
+  onLogin: (result: { message: string }) => void;
 };
-
 
 export function Login({ onLogin }: Props) {
   const [email, setEmail] = useState("");
@@ -27,15 +26,25 @@ export function Login({ onLogin }: Props) {
     setLoading(true);
 
     try {
-      const result = await apiPost<{ token: string }>("auth/login", {
+      await apiPost("auth/login", {
         email: email.trim(),
         password,
       });
 
-      onLogin(result.token);
-      navigate("/vehicles");
-    } catch (e: any) {
-      setError(e.message || t("loginFailed"));
+      navigate("/vehicles", { replace: true }); // ✅ prevent back to login
+
+      // ✅ няма token – cookie вече е set-нат
+      onLogin({ message: "Login successful, navigating to vehicles..." });
+      console.log("Login successful, navigating to vehicles...");
+      debugger;
+      
+    } catch (err: any) {
+      const msg =
+        err?.response?.data ||
+        err?.message ||
+        t("loginFailed");
+
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -47,7 +56,7 @@ export function Login({ onLogin }: Props) {
         <h2 style={title}>{t("login")}</h2>
 
         <form onSubmit={handleSubmit}>
-          {/* ✅ Email */}
+          {/* Email */}
           <Field label={t("email")}>
             <input
               type="email"
@@ -59,7 +68,7 @@ export function Login({ onLogin }: Props) {
             />
           </Field>
 
-          {/* ✅ Password */}
+          {/* Password */}
           <Field label={t("password")}>
             <input
               type="password"
@@ -70,7 +79,6 @@ export function Login({ onLogin }: Props) {
             />
           </Field>
 
-          {/* ✅ Button */}
           <button
             type="submit"
             disabled={loading}
@@ -83,7 +91,6 @@ export function Login({ onLogin }: Props) {
 
         {error && <p style={errorStyle}>{error}</p>}
 
-        {/* ✅ Navigation */}
         <p style={footerText}>
           {t("noAccount")}{" "}
           <Link to="/register" style={link}>
@@ -94,10 +101,8 @@ export function Login({ onLogin }: Props) {
     </div>
   );
 }
-``
 
-
-/* ✅ Field wrapper */
+/* Field wrapper */
 function Field({
   label,
   children
@@ -113,8 +118,7 @@ function Field({
   );
 }
 
-/* ✅ Styles */
-
+/* Styles */
 const container: React.CSSProperties = {
   maxWidth: 420,
   margin: "0 auto",
@@ -147,8 +151,7 @@ const input: React.CSSProperties = {
   background: "#0f172a",
   color: "white",
   fontSize: 16,
-  boxSizing: "border-box",
-  boxShadow: "inset 0 1px 3px rgba(0,0,0,0.4)"
+  boxSizing: "border-box"
 };
 
 const btn: React.CSSProperties = {

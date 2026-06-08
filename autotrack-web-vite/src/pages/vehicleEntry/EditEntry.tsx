@@ -15,7 +15,7 @@ export function EditEntry() {
   const { t } = useTranslation();
 
   const [loading, setLoading] = useState(true);
-
+  const [vehicleIdState, setVehicleIdState] = useState<number | null>(null);
   const [type, setType] = useState<number>(0);
   const [amount, setAmount] = useState<number | null>(null);
   const [totalPrice, setTotalPrice] = useState<number | null>(null);
@@ -43,12 +43,21 @@ export function EditEntry() {
   const isInsurance = type === EntryType.InsuranceType;
   const isVignette = type === EntryType.VignetteType;
 
+  function formatDate(date: string) {
+    if (!date) return "";
+
+    const d = new Date(date);
+
+    return d.toLocaleDateString("bg-BG"); // ✅ 01.12.2026
+  }
+debugger;
   useEffect(() => {
     loadEntry();
   }, []);
 
   const loadEntry = async () => {
     try {
+      debugger;
       const data = await apiGet<VehicleEntry>(`entries/${id}`);
 
       setType(data.type);
@@ -68,6 +77,7 @@ export function EditEntry() {
 
       setNextDueKm(data.nextDueKm ?? null);
       setNextDueDate(data.nextDueDate?.split("T")[0] ?? "");
+      setVehicleIdState(data.vehicleId ?? null);
       console.log(data.expenseCategory);
 
     } catch (e: any) {
@@ -80,22 +90,28 @@ export function EditEntry() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+  const payload: any = {
+    vehicleId: vehicleIdState ?? 0,
+    entryType: type,
+    totalPrice,
+    odometerKm,
+    expenseCategory: category,
+    serviceType,
+    insuranceType,
+    title,
+    description,
+    startDate: startDate || null,
+    endDate: endDate || null,
+    nextDueKm,
+    nextDueDate: nextDueDate || null
+  };
+
+  if (amount !== null && !isNaN(amount)) {
+    payload.amount = amount;
+  }
+
     try {
-      await apiPut(`entries/${id}`, {
-        entryType: type,
-        amount,
-        totalPrice,
-        odometerKm,
-        expenseCategory: category,
-        serviceType,
-        insuranceType,
-        title,
-        description,
-        startDate: startDate || null,
-        endDate: endDate || null,
-        nextDueKm,
-        nextDueDate: nextDueDate || null
-      });
+     await apiPut(`entries/${id}`, payload);
 
       navigate(-1);
     } catch (e: any) {
@@ -166,7 +182,13 @@ return (
               <input
                 type="number"
                 value={amount ?? ""}
-                onChange={(e) => setAmount(Number(e.target.value))}
+                onChange={(e) => {
+                  
+                    const val = e.target.value;
+                    const parsed = parseFloat(val.replace(",", "."));
+
+                    setAmount(val === "" || isNaN(parsed) ? null : parsed);
+                  }}
                 style={getInputStyle()}
               />
             </Field>
@@ -276,7 +298,11 @@ return (
               <input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setEndDate(value);
+                  setNextDueDate(value);
+                }}
                 style={getInputStyle()}
               />
             </Field>
