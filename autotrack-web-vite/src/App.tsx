@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Login } from "./pages/auth/Login";
 import { Vehicles } from "./pages/vehicles/VehicleList";
@@ -14,6 +13,9 @@ import { useIsMobile } from "./hooks/useIsMobile";
 import { MobileNav } from "./components/MobileNav";
 import { EditVehicle } from "./pages/vehicles/EditVehicle";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { useEffect } from "react";
+import { apiGet } from "./services/api";
 
 
 function EntryWrapper() {
@@ -23,27 +25,34 @@ function EntryWrapper() {
 
 function App() {
   const isMobile = useIsMobile();
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem("token")
-  );
+  const [isAuth, setIsAuth] = useState<boolean | null>(null);
 
-  const onLogin = (newToken: string) => {
-    localStorage.setItem("token", newToken);
-    setToken(newToken);
+  const onLogin = () => {
+    setIsAuth(true);
   };
 
   const onLogout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
+    setIsAuth(false);
   };
 
-  
-function DashboardWrapper() {
-  const { vehicleId } = useParams();
+  useEffect(() => {
+    apiGet("vehicles")
+      .then(() => setIsAuth(true))
+      .catch(() => setIsAuth(false));
+  }, []);
 
-  return <Dashboard vehicleId={Number(vehicleId)} />;
-}
+  function DashboardWrapper() {
+    const { vehicleId } = useParams();
+    return <Dashboard vehicleId={Number(vehicleId)} />;
+  }
 
+  if (isAuth === null) {
+    return (
+      <div style={{ textAlign: "center", marginTop: 100 }}>
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>
@@ -54,47 +63,85 @@ function DashboardWrapper() {
       </div>
 
       <Routes>
+       
         <Route
           path="/login"
-          element={!token ? <Login onLogin={onLogin} /> : <Navigate to="/vehicles" />}/>
+          element={
+            !isAuth ? <Login onLogin={onLogin} /> : <Navigate to="/vehicles" />
+          }
+        />
+
         <Route 
           path="/register" 
           element={<Register />} />
-
+       
         <Route
           path="/vehicles"
-          element={token ? <Vehicles onLogout={onLogout} /> : <Navigate to="/login" />} />
+          element={
+            <ProtectedRoute isAuth={isAuth === true}>
+              <Vehicles onLogout={onLogout} />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/vehicles/add"
-          element={token ? <AddVehicle /> : <Navigate to="/login" />}/>
+          element={
+            <ProtectedRoute isAuth={isAuth === true}>
+              <AddVehicle />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/vehicles/:vehicleId/entries"
-          element={token ? <EntryWrapper /> : <Navigate to="/login" />}/>
+          element={
+            <ProtectedRoute isAuth={isAuth === true}>
+              <EntryWrapper />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route 
-          path="/vehicles/:vehicleId/entries/add" 
-          element={<AddEntry />} />
+        <Route
+          path="/vehicles/:vehicleId/entries/add"
+          element={
+            <ProtectedRoute isAuth={isAuth === true}>
+              <AddEntry />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route 
-          path="/entries/edit/:id" 
-          element={<EditEntry />} />
+        <Route
+          path="/entries/edit/:id"
+          element={
+            <ProtectedRoute isAuth={isAuth === true}>
+              <EditEntry />
+            </ProtectedRoute>
+          }
+        />
 
-        
         <Route
           path="/vehicles/:vehicleId/dashboard"
-          element={<DashboardWrapper />}
+          element={
+            <ProtectedRoute isAuth={isAuth === true}>
+              <DashboardWrapper />
+            </ProtectedRoute>
+          }
         />
- 
-        <Route 
-          path="/vehicles/edit/:id" 
-          element={<EditVehicle />} 
+
+        <Route
+          path="/vehicles/edit/:id"
+          element={
+            <ProtectedRoute isAuth={isAuth === true}>
+              <EditVehicle />
+            </ProtectedRoute>
+          }
         />
+
 
         <Route 
           path="*" 
-          element={<Navigate to="/vehicles" />} />
+          element={isAuth ? <Navigate to="/vehicles" /> : <Navigate to="/login" />} />
 
       </Routes>
 

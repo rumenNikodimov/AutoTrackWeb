@@ -43,14 +43,14 @@ export function EditEntry() {
   const isInsurance = type === EntryType.InsuranceType;
   const isVignette = type === EntryType.VignetteType;
 
-  function formatDate(date: string) {
-    if (!date) return "";
+  // function formatDate(date: string) {
+  //   if (!date) return "";
 
-    const d = new Date(date);
+  //   const d = new Date(date);
 
-    return d.toLocaleDateString("bg-BG"); // ✅ 01.12.2026
-  }
-debugger;
+  //   return d.toLocaleDateString("bg-BG"); // ✅ 01.12.2026
+  // }
+
   useEffect(() => {
     loadEntry();
   }, []);

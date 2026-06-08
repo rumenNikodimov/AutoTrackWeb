@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-//import { apiPost, apiPublicPost } from "../../services/api";
+import { apiPost } from "../../services/api";
 import { useTranslation } from "react-i18next";
 
 export function Register() {

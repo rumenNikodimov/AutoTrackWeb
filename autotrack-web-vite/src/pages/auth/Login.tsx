@@ -36,7 +36,6 @@ export function Login({ onLogin }: Props) {
       // ✅ няма token – cookie вече е set-нат
       onLogin({ message: "Login successful, navigating to vehicles..." });
       console.log("Login successful, navigating to vehicles...");
-      debugger;
       
     } catch (err: any) {
       const msg =
