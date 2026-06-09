@@ -57,7 +57,6 @@ export function EditEntry() {
 
   const loadEntry = async () => {
     try {
-      debugger;
       const data = await apiGet<VehicleEntry>(`entries/${id}`);
 
       setType(data.type);

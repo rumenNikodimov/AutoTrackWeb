@@ -20,7 +20,6 @@ const api = axios.create({
 export default api;
 
 
-
 /* ================= GET ================= */
 
 export async function apiGet<T>(url: string): Promise<T> {
