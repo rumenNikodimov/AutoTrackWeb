@@ -12,7 +12,6 @@ import { Dashboard } from "./pages/dashboard/Dashboard";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { MobileNav } from "./components/MobileNav";
 import { EditVehicle } from "./pages/vehicles/EditVehicle";
-import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { useEffect } from "react";
 import { apiGet } from "./services/api";
@@ -26,6 +25,18 @@ function EntryWrapper() {
 function App() {
   const isMobile = useIsMobile();
   const [isAuth, setIsAuth] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("autotrack:theme");
+
+    if (savedTheme === "dark" || savedTheme === "light") {
+      document.documentElement.classList.toggle("dark", savedTheme === "dark");
+      return;
+    }
+
+    document.documentElement.classList.add("dark");
+    localStorage.setItem("autotrack:theme", "dark");
+  }, []);
 
   const onLogin = () => {
     setIsAuth(true);
@@ -56,11 +67,6 @@ function App() {
 
   return (
     <BrowserRouter>
-
-      {/* ✅ GLOBAL LANGUAGE SWITCH */}
-      <div style={topBar}>
-        <LanguageSwitcher />
-      </div>
 
       <Routes>
        
@@ -151,11 +157,3 @@ function App() {
 }
 
 export default App;
-
-//Styles
-const topBar: React.CSSProperties = {
-  position: "fixed",
-  top: 10,
-  right: 10,
-  zIndex: 9999
-};

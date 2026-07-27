@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { createHoverHandlers } from "../utils/uiHandlers";
 import { useTranslation } from "react-i18next";
+import { storeVehicleId } from "../utils/vehicleSession";
   
 type Props = {
   vehicle: any;
@@ -12,18 +13,21 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  const goTo = (path: string) => {
+    storeVehicleId(vehicle.id);
+    navigate(path);
+  };
+
   return (
-    <div  style={card}
-
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "scale(1.01)";
-            }}
-
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "scale(1)";
-            }}
-          >
-      {/* ✅ Info */}
+    <div
+      style={card}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-1px)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+      }}
+    >
       <div style={{ marginBottom: 12 }}>
         <div style={title}>
           {vehicle.brand} {vehicle.model}
@@ -44,10 +48,10 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
           style={secondaryBtn}
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/vehicles/${vehicle.id}/dashboard`)
+            goTo(`/vehicles/${vehicle.id}/dashboard`)
           }}
         >
-          📊 {t("dashboard")}
+          {t("dashboard")}
         </button>
 
         <button
@@ -55,10 +59,10 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
           style={secondaryBtn}
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/vehicles/${vehicle.id}/entries/add`)
+            goTo(`/vehicles/${vehicle.id}/entries/add`)
           }}
         >
-          ➕ {t("addEntry")} 
+          {t("addEntry")}
         </button>
       </div>
 
@@ -70,10 +74,10 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
           style={secondaryBtn}
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/vehicles/${vehicle.id}/entries`);
+            goTo(`/vehicles/${vehicle.id}/entries`);
           }}
         >
-          ⛽ {t("entryLog")}       
+          {t("entryLog")}
         </button>
 
         
@@ -83,19 +87,22 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
-            navigate(`/vehicles/edit/${vehicle.id}`);
+            goTo(`/vehicles/edit/${vehicle.id}`);
           }}
         >
-          ✏️ {t("edit")}
+          {t("edit")}
         </button>
 
 
         <button
           {...createHoverHandlers("rgba(239,68,68,0.6)")}
           style={dangerBtn}
-          onClick={() => onDelete(vehicle.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(vehicle.id);
+          }}
         >
-          🗑 {t("delete")}
+          {t("delete")}
         </button>
       </div>
     </div>
@@ -107,29 +114,32 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
 
 
 const card: React.CSSProperties = {
-  background: "#1e293b",
-  padding: 20,
-  borderRadius: 16,
+  background: "var(--ui-card-bg)",
+  padding: 18,
+  borderRadius: 20,
+  border: "1px solid var(--ui-card-border)",
   marginBottom: 16,
-  boxShadow: "0 10px 20px rgba(0,0,0,0.4)",
+  boxShadow: "var(--ui-shadow)",
   transition: "all 0.2s",
-  cursor: "pointer"
+  cursor: "default",
+  backdropFilter: "blur(10px)",
 };
 
 const title: React.CSSProperties = {
   fontSize: 18,
-  fontWeight: "bold",
+  fontWeight: 700,
+  color: "var(--ui-text-main)",
   marginBottom: 4
 };
 
 const meta: React.CSSProperties = {
   fontSize: 14,
-  opacity: 0.8
+  color: "var(--ui-text-muted)"
 };
 
 const metaSecondary: React.CSSProperties = {
   fontSize: 13,
-  opacity: 0.6
+  color: "var(--ui-text-muted)"
 };
 
 const divider: React.CSSProperties = {
@@ -163,13 +173,15 @@ const baseBtn: React.CSSProperties = {
 
 const secondaryBtn: React.CSSProperties = {
   ...baseBtn,
-  background: "#334155",
-  color: "white"
+  background: "var(--ui-btn-bg)",
+  color: "var(--ui-btn-text)",
+  border: "1px solid var(--ui-btn-border)",
 };
 
 const dangerBtn: React.CSSProperties = {
   ...baseBtn,
-  background: "#ef4444",
+  background: "#dc2626",
   color: "white"
 };
+
 

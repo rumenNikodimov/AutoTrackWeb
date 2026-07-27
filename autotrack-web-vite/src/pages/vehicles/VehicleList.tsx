@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { VehicleCard } from "../../components/VehicleCard";
 import { createHoverHandlers } from "../../utils/uiHandlers";
 import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
+import { ThemeToggle } from "../../components/ThemeToggle";
 
 type Vehicle = {
   id: number;
@@ -46,23 +48,29 @@ export function Vehicles({ onLogout }: Props) {
   }, []);
 
   return (
-    <div style={container}>
+    <div style={screen}>
+      <header style={headerCard}>
+        <div>
+          <p style={eyebrow}>AUTOTRACK IOS</p>
+          <h1 style={title}>My Vehicles</h1>
+        </div>
 
-      {/* ✅ Title */}
-      <h2 style={{ textAlign: "center" }}>
-        🚗 {t("vehicles")}
-      </h2>
+        <div style={headerActions}>
+          <LanguageSwitcher />
+          <ThemeToggle />
+        </div>
+      </header>
 
-      {/* ✅ Loading / Error */}
+      <section style={listWrap}>
+
       {loading && <p>{t("loading")}</p>}
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p style={{ color: "#f87171" }}>{error}</p>}
 
       {!loading && !error && vehicles.length === 0 && (
         <p>{t("noVehicles")}</p>
       )}
 
-      {/* ✅ Cards */}
       {vehicles.map((vehicle) => (
         <VehicleCard
           key={vehicle.id}
@@ -70,8 +78,8 @@ export function Vehicles({ onLogout }: Props) {
           onDelete={handleDelete}
         />
       ))}
+      </section>
 
-      {/* ✅ Actions */}
       <div style={bottomActions}>
         <button
           {...createHoverHandlers("rgba(59,130,246,0.6)")}
@@ -83,37 +91,93 @@ export function Vehicles({ onLogout }: Props) {
 
         <button
           {...createHoverHandlers("rgba(59,130,246,0.6)")}
-          style={btn}
+          style={primaryBtn}
           onClick={() => navigate("/vehicles/add")}
         >
-          ➕ {t("addVehicle")}
+          {t("addVehicle")}
         </button>
       </div>
     </div>
   );
 }
 
-const container: React.CSSProperties = {
-  maxWidth: 500,
-  margin: "20px auto",
-  padding: "10px"
+const screen: React.CSSProperties = {
+  width: "100%",
+  maxWidth: 440,
+  margin: "0 auto",
+  padding: "10px 8px 110px"
+};
+
+const headerCard: React.CSSProperties = {
+  position: "relative",
+  zIndex: 30,
+  marginBottom: 14,
+  padding: 14,
+  borderRadius: 20,
+  border: "1px solid var(--ui-card-border)",
+  background: "var(--ui-card-bg)",
+  boxShadow: "var(--ui-shadow)",
+  display: "flex",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  gap: 10,
+  backdropFilter: "blur(12px)"
+};
+
+const eyebrow: React.CSSProperties = {
+  margin: 0,
+  fontSize: 11,
+  letterSpacing: 1.2,
+  fontWeight: 700,
+  color: "var(--ui-text-muted)"
+};
+
+const title: React.CSSProperties = {
+  margin: "4px 0 0",
+  fontSize: 30,
+  lineHeight: 1.05,
+  fontWeight: 800,
+  color: "var(--ui-text-main)",
+};
+
+const headerActions: React.CSSProperties = {
+  position: "relative",
+  zIndex: 31,
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+};
+
+const listWrap: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 2,
 };
 
 const bottomActions: React.CSSProperties = {
   display: "flex",
   gap: 10,
-  marginTop: 20,
+  marginTop: 12,
   justifyContent: "center",
-  flexWrap: "wrap"
+  flexWrap: "wrap",
 };
 
 const btn: React.CSSProperties = {
+  flex: 1,
+  minHeight: 46,
   padding: "10px 14px",
-  borderRadius: "20px",
-  border: "none",
-  background: "#334155",
-  color: "white",
+  borderRadius: 14,
+  border: "1px solid var(--ui-btn-border)",
+  background: "var(--ui-btn-bg)",
+  color: "var(--ui-btn-text)",
   cursor: "pointer",
-  minWidth: 100,
   fontWeight: 500
 };
+
+const primaryBtn: React.CSSProperties = {
+  ...btn,
+  border: "none",
+  background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+  boxShadow: "0 10px 22px rgba(37,99,235,0.42)",
+};
+
