@@ -97,35 +97,44 @@ export function EntryList({ vehicleId }: Props) {
             animationDelay: `${i * 0.05}s`,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 8,
+                gap: 6,
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                fontSize: 15,
+                fontSize: 13,
                 minWidth: 0,
                 flex: 1,
               }}
             >
-              <span style={{ fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis" }}>
+              <span style={{ fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", flexShrink: 0 }}>
                 {t(getEntryTypeKey(e.type) || "")}
               </span>
 
-              {e.type !== EntryType.InsuranceType && e.type !== EntryType.VignetteType ? (
-                <span style={{ opacity: 0.9, fontWeight: 600 }}>
-                  {e.odometerKm} km
-                </span>
-              ) : null}
-
-              <span style={{ opacity: 0.65, fontSize: 12 }}>
-                {new Date(e.occurredAt).toLocaleDateString()}
+              <span
+                style={{
+                  opacity: 0.8,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  minWidth: 0,
+                }}
+                title={`${
+                  e.type !== EntryType.InsuranceType && e.type !== EntryType.VignetteType
+                    ? `${e.odometerKm} km • `
+                    : ""
+                }${new Date(e.occurredAt).toLocaleDateString()} • ${
+                  e.type === EntryType.ElectricType ? "⚡" : "⛽"
+                } ${e.amount} ${e.type === EntryType.ElectricType ? "kWh" : "L"} • 💰 ${e.totalPrice.toFixed(2)} ${t("currency")}`}
+              >
+                {e.type !== EntryType.InsuranceType && e.type !== EntryType.VignetteType
+                  ? `${e.odometerKm} km • `
+                  : ""}
+                {new Date(e.occurredAt).toLocaleDateString()} • {e.type === EntryType.ElectricType ? "⚡" : "⛽"} {e.amount} {e.type === EntryType.ElectricType ? "kWh" : "L"} • 💰 {e.totalPrice.toFixed(2)} {t("currency")}
               </span>
-
-              {e.type === EntryType.ElectricType ? "⚡" : "⛽"} {e.amount} {e.type === EntryType.ElectricType ? "kWh" : "L"} • 💰 {e.totalPrice.toFixed(2)} {t("currency")}
             </div>
 
             <button
@@ -138,8 +147,8 @@ export function EntryList({ vehicleId }: Props) {
                 setOpenMenuEntryId((prev) => (prev === e.id ? null : e.id));
               }}
               style={{
-                width: 34,
-                height: 34,
+                width: 32,
+                height: 32,
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
