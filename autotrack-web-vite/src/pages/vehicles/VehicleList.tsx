@@ -27,6 +27,15 @@ type Vehicle = {
   nextDueKm?: number;
 };
 
+type EntryLike = {
+  odometerKm?: number | string;
+  odometer?: number | string;
+  mileageKm?: number | string;
+  mileage?: number | string;
+  km?: number | string;
+  kilometers?: number | string;
+};
+
 type Props = {
   onLogout: () => void;
 };
@@ -39,6 +48,30 @@ export function Vehicles({ onLogout }: Props) {
 
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const parseMileage = (value: unknown): number | null => {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string") {
+      const numeric = Number(value.replace(/,/g, "").trim());
+      return Number.isFinite(numeric) ? numeric : null;
+    }
+    return null;
+  };
+
+  const collectMileageCandidates = (source: Record<string, unknown>) => {
+    return [
+      parseMileage(source.currentMileageKm),
+      parseMileage(source.currentMileage),
+      parseMileage(source.current_mileage),
+      parseMileage(source.currentMileageKM),
+      parseMileage(source.odometerKm),
+      parseMileage(source.odometer),
+      parseMileage(source.mileageKm),
+      parseMileage(source.mileage),
+      parseMileage(source.kilometers),
+      parseMileage(source.km),
+    ].filter((n): n is number => n !== null);
+  };
 
   const handleDelete = async (id: number) => {
     const confirmed = confirm(t("deleteVehicleConfirm"));
@@ -57,7 +90,36 @@ export function Vehicles({ onLogout }: Props) {
 
   useEffect(() => {
     apiGet<Vehicle[]>("vehicles")
-      .then(setVehicles)
+      .then(async (baseVehicles) => {
+        const withMileage = await Promise.all(
+          baseVehicles.map(async (vehicle) => {
+            let entryMileageCandidates: number[] = [];
+
+            try {
+              const entries = await apiGet<EntryLike[]>(`entries/vehicle/${vehicle.id}`);
+              entryMileageCandidates = entries.flatMap((entry) =>
+                collectMileageCandidates(entry as unknown as Record<string, unknown>)
+              );
+            } catch {
+              entryMileageCandidates = [];
+            }
+
+            const vehicleMileageCandidates = collectMileageCandidates(
+              vehicle as unknown as Record<string, unknown>
+            );
+
+            const allCandidates = [...vehicleMileageCandidates, ...entryMileageCandidates];
+            const highestMileage = allCandidates.length > 0 ? Math.max(...allCandidates) : null;
+
+            return {
+              ...vehicle,
+              currentMileageKm: highestMileage ?? vehicle.currentMileageKm,
+            };
+          })
+        );
+
+        setVehicles(withMileage);
+      })
       .catch((err) => {
           console.error("Vehicles error:", err);
            

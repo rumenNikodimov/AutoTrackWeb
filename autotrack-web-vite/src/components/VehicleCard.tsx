@@ -17,17 +17,52 @@ export function VehicleCard({ vehicle, onDelete, isSelected, onSelect }: Props) 
   const [menuOpen, setMenuOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const currentMileage =
-    vehicle.currentMileageKm ??
-    vehicle.currentMileage ??
-    vehicle.odometerKm ??
-    vehicle.odometer ??
-    vehicle.mileageKm ??
-    vehicle.mileage;
+  const toMileageNumber = (value: unknown): number | null => {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string") {
+      const normalized = value.replace(/,/g, "").trim();
+      const numeric = Number(normalized);
+      return Number.isFinite(numeric) ? numeric : null;
+    }
+    return null;
+  };
+
+  const topLevelMileageCandidates = [
+    vehicle.currentMileageKm,
+    vehicle.currentMileage,
+    vehicle.current_mileage,
+    vehicle.currentMileageKM,
+    vehicle.odometerKm,
+    vehicle.odometer,
+    vehicle.mileageKm,
+    vehicle.mileage,
+    vehicle.kilometers,
+    vehicle.km,
+  ];
+
+  const entryCollections = [vehicle.entries, vehicle.vehicleEntries, vehicle.history]
+    .filter(Array.isArray)
+    .flat() as Array<Record<string, unknown>>;
+
+  const entryMileageCandidates = entryCollections.flatMap((entry) => [
+    entry.odometerKm,
+    entry.odometer,
+    entry.mileageKm,
+    entry.mileage,
+    entry.kilometers,
+    entry.km,
+  ]);
+
+  const allMileageValues = [...topLevelMileageCandidates, ...entryMileageCandidates]
+    .map(toMileageNumber)
+    .filter((value): value is number => value !== null);
+
+  const highestMileage =
+    allMileageValues.length > 0 ? Math.max(...allMileageValues) : null;
 
   const mileageText =
-    typeof currentMileage === "number" && Number.isFinite(currentMileage)
-      ? `${new Intl.NumberFormat("en-US").format(currentMileage)} km`
+    typeof highestMileage === "number"
+      ? `${new Intl.NumberFormat("en-US").format(highestMileage)} km`
       : t("notAvailable");
 
   const upcomingEvent =
@@ -85,7 +120,7 @@ export function VehicleCard({ vehicle, onDelete, isSelected, onSelect }: Props) 
         <div style={infoGrid}>
           <InfoItem label={t("licensePlate")} value={vehicle.licensePlate || t("notAvailable")} />
           <InfoItem label={t("year")} value={String(vehicle.year || t("notAvailable"))} />
-          <InfoItem label={t("currentMileage")} value={mileageText} />
+          <InfoItem label={`${t("currentMileage")} |`} value={mileageText} />
           <InfoItem label={t("upcomingEvent")} value={upcomingEvent} />
         </div>
 
