@@ -7,14 +7,15 @@ import { storeVehicleId } from "../utils/vehicleSession";
 type Props = {
   vehicle: any;
   onDelete: (id: number) => void;
+  isSelected: boolean;
+  onSelect: () => void;
 };
 
-export function VehicleCard({ vehicle, onDelete }: Props) {
+export function VehicleCard({ vehicle, onDelete, isSelected, onSelect }: Props) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [selected, setSelected] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const currentMileage =
     vehicle.currentMileageKm ??
@@ -27,15 +28,15 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
   const mileageText =
     typeof currentMileage === "number" && Number.isFinite(currentMileage)
       ? `${new Intl.NumberFormat("en-US").format(currentMileage)} km`
-      : "N/A";
+      : t("notAvailable");
 
   const upcomingEvent =
     vehicle.upcomingEvent ??
     vehicle.upcomingNotification ??
     vehicle.nextEventTitle ??
-    (vehicle.nextDueDate ? `Due on ${new Date(vehicle.nextDueDate).toLocaleDateString()}` : null) ??
-    (vehicle.nextDueKm ? `Due at ${vehicle.nextDueKm} km` : null) ??
-    "No upcoming event";
+    (vehicle.nextDueDate ? t("dueOnDate", { date: new Date(vehicle.nextDueDate).toLocaleDateString() }) : null) ??
+    (vehicle.nextDueKm ? t("dueAtKm", { km: vehicle.nextDueKm }) : null) ??
+    t("noUpcomingEvent");
 
   const goTo = (path: string) => {
     storeVehicleId(vehicle.id);
@@ -44,7 +45,7 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
 
   useEffect(() => {
     function onClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      if (cardRef.current && !cardRef.current.contains(event.target as Node)) {
         setMenuOpen(false);
       }
     }
@@ -53,11 +54,18 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (!isSelected) {
+      setMenuOpen(false);
+    }
+  }, [isSelected]);
+
   return (
     <div
-      style={selected ? selectedCard : card}
+      ref={cardRef}
+      style={isSelected ? selectedCard : card}
       onClick={() => {
-        setSelected((prev) => !prev);
+        onSelect();
         setMenuOpen(false);
       }}
       onMouseEnter={(e) => {
@@ -72,108 +80,107 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
           <div style={title}>
             {vehicle.brand} {vehicle.model}
           </div>
+        </div>
 
-          <div ref={menuRef} style={menuWrap} onClick={(e) => e.stopPropagation()}>
+        <div style={infoGrid}>
+          <InfoItem label={t("licensePlate")} value={vehicle.licensePlate || t("notAvailable")} />
+          <InfoItem label={t("year")} value={String(vehicle.year || t("notAvailable"))} />
+          <InfoItem label={t("currentMileage")} value={mileageText} />
+          <InfoItem label={t("upcomingEvent")} value={upcomingEvent} />
+        </div>
+
+        {!isSelected && (
+          <p style={hintText}>{t("tapCardToShowActions")}</p>
+        )}
+      </div>
+
+      {/* ✅ separator */}
+      {isSelected && <div style={divider} />}
+
+      {/* ✅ Primary actions */}
+      {isSelected && (
+        <>
+          <div style={row}>
             <button
-              type="button"
-              style={menuBtn}
+              {...createHoverHandlers("rgba(107,114,128,0.6)")}
+              style={secondaryBtn}
               onClick={(e) => {
                 e.stopPropagation();
-                setSelected(true);
+                goTo(`/vehicles/${vehicle.id}/dashboard`);
+              }}
+            >
+              {t("dashboard")}
+            </button>
+
+            <button
+              {...createHoverHandlers("rgba(107,114,128,0.6)")}
+              style={secondaryBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                goTo(`/vehicles/${vehicle.id}/entries/add`);
+              }}
+            >
+              {t("addEntry")}
+            </button>
+
+            <button
+              type="button"
+              {...createHoverHandlers("rgba(107,114,128,0.6)")}
+              style={secondaryBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                goTo(`/vehicles/${vehicle.id}/entries`);
+              }}
+            >
+              {t("entryLog")}
+            </button>
+
+            <button
+              type="button"
+              {...createHoverHandlers("rgba(107,114,128,0.6)")}
+              style={menuBtnInRow}
+              onClick={(e) => {
+                e.stopPropagation();
                 setMenuOpen((prev) => !prev);
               }}
               aria-haspopup="menu"
               aria-expanded={menuOpen}
-              aria-label="Open actions"
+              aria-label={t("openActions")}
             >
               <span style={dot} />
               <span style={dot} />
               <span style={dot} />
             </button>
-
-            {menuOpen && (
-              <div style={menuDropdown} role="menu">
-                <button
-                  type="button"
-                  style={menuItem}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    setMenuOpen(false);
-                    goTo(`/vehicles/edit/${vehicle.id}`);
-                  }}
-                >
-                  {t("edit")}
-                </button>
-
-                <button
-                  type="button"
-                  style={menuDangerItem}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setMenuOpen(false);
-                    onDelete(vehicle.id);
-                  }}
-                >
-                  {t("delete")}
-                </button>
-              </div>
-            )}
           </div>
-        </div>
 
-        <div style={infoGrid}>
-          <InfoItem label="Plate" value={vehicle.licensePlate || "N/A"} />
-          <InfoItem label="Year" value={String(vehicle.year || "N/A")} />
-          <InfoItem label="Current mileage" value={mileageText} />
-          <InfoItem label="Upcoming event" value={upcomingEvent} />
-        </div>
+          {menuOpen && (
+            <div style={inlineMenuRow} role="menu" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                style={inlineEditBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpen(false);
+                  goTo(`/vehicles/edit/${vehicle.id}`);
+                }}
+              >
+                {t("edit")}
+              </button>
 
-        {!selected && (
-          <p style={hintText}>Tap card to show actions</p>
-        )}
-      </div>
-
-      {/* ✅ separator */}
-      {selected && <div style={divider} />}
-
-      {/* ✅ Primary actions */}
-      {selected && (
-        <div style={row}>
-          <button
-            {...createHoverHandlers("rgba(107,114,128,0.6)")}
-            style={secondaryBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              goTo(`/vehicles/${vehicle.id}/dashboard`);
-            }}
-          >
-            {t("dashboard")}
-          </button>
-
-          <button
-            {...createHoverHandlers("rgba(107,114,128,0.6)")}
-            style={secondaryBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              goTo(`/vehicles/${vehicle.id}/entries/add`);
-            }}
-          >
-            {t("addEntry")}
-          </button>
-
-          <button
-            type="button"
-            {...createHoverHandlers("rgba(107,114,128,0.6)")}
-            style={secondaryBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              goTo(`/vehicles/${vehicle.id}/entries`);
-            }}
-          >
-            {t("entryLog")}
-          </button>
-        </div>
+              <button
+                type="button"
+                style={inlineDeleteBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpen(false);
+                  onDelete(vehicle.id);
+                }}
+              >
+                {t("delete")}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -282,18 +289,21 @@ const divider: React.CSSProperties = {
 const row: React.CSSProperties = {
   display: "flex",
   gap: 8,
-  marginTop: 10
+  marginTop: 10,
+  flexWrap: "wrap",
 };
 
 const baseBtn: React.CSSProperties = {
-  flex: 1,
-  padding: "10px",
+  flex: "1 1 120px",
+  minHeight: 46,
+  padding: "11px 12px",
   borderRadius: 12,
   border: "none",
   cursor: "pointer",
-  fontSize: 14,
-  minHeight: 42,
-  transition: "all 0.2s"
+  fontSize: 15,
+  fontWeight: 600,
+  lineHeight: 1.1,
+  transition: "all 0.2s",
 };
 
 // const primaryBtn: React.CSSProperties = {
@@ -304,15 +314,10 @@ const baseBtn: React.CSSProperties = {
 
 const secondaryBtn: React.CSSProperties = {
   ...baseBtn,
-  background: "var(--ui-btn-bg)",
+  background: "linear-gradient(180deg, rgba(51,65,85,0.72), rgba(30,41,59,0.72))",
   color: "var(--ui-btn-text)",
-  border: "1px solid var(--ui-btn-border)",
-};
-
-const menuWrap: React.CSSProperties = {
-  position: "relative",
-  zIndex: 80,
-  flexShrink: 0,
+  border: "1px solid rgba(148,163,184,0.38)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
 };
 
 const menuBtn: React.CSSProperties = {
@@ -328,6 +333,17 @@ const menuBtn: React.CSSProperties = {
   gap: 4,
 };
 
+const menuBtnInRow: React.CSSProperties = {
+  ...menuBtn,
+  width: 46,
+  minWidth: 46,
+  height: 46,
+  borderRadius: 14,
+  flex: "0 0 auto",
+  border: "1px solid rgba(148,163,184,0.45)",
+  background: "linear-gradient(180deg, rgba(59,130,246,0.22), rgba(30,64,175,0.2))",
+};
+
 const dot: React.CSSProperties = {
   width: 4,
   height: 4,
@@ -335,35 +351,40 @@ const dot: React.CSSProperties = {
   background: "var(--ui-btn-text)",
 };
 
-const menuDropdown: React.CSSProperties = {
-  position: "absolute",
-  bottom: "calc(100% + 6px)",
-  right: 0,
-  minWidth: 130,
+const inlineMenuRow: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: 8,
+  marginTop: 8,
+  marginBottom: 2,
+  paddingRight: 2,
+};
+
+const inlineActionBtn: React.CSSProperties = {
+  minWidth: 94,
+  minHeight: 42,
+  padding: "9px 14px",
   borderRadius: 12,
   border: "1px solid var(--ui-btn-border)",
-  background: "var(--ui-card-bg)",
-  boxShadow: "var(--ui-shadow)",
-  overflow: "hidden",
-  zIndex: 120,
-};
-
-const menuItem: React.CSSProperties = {
-  width: "100%",
-  textAlign: "left",
-  padding: "10px 12px",
-  border: "none",
-  borderBottom: "1px solid var(--ui-btn-border)",
-  background: "transparent",
-  color: "var(--ui-text-main)",
+  background: "var(--ui-btn-bg)",
+  color: "var(--ui-btn-text)",
   cursor: "pointer",
   fontSize: 14,
+  fontWeight: 600,
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.07)",
 };
 
-const menuDangerItem: React.CSSProperties = {
-  ...menuItem,
-  borderBottom: "none",
-  color: "#ef4444",
+const inlineEditBtn: React.CSSProperties = {
+  ...inlineActionBtn,
+  border: "1px solid rgba(59,130,246,0.5)",
+  background: "linear-gradient(180deg, rgba(59,130,246,0.25), rgba(37,99,235,0.18))",
+};
+
+const inlineDeleteBtn: React.CSSProperties = {
+  ...inlineActionBtn,
+  color: "#fecaca",
+  border: "1px solid rgba(239,68,68,0.55)",
+  background: "linear-gradient(180deg, rgba(239,68,68,0.22), rgba(185,28,28,0.16))",
 };
 
 

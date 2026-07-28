@@ -35,6 +35,7 @@ export function Vehicles({ onLogout }: Props) {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [selectedVehicleId, setSelectedVehicleId] = useState<number | null>(null);
 
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -46,6 +47,9 @@ export function Vehicles({ onLogout }: Props) {
     try {
       await apiDelete(`vehicles/${id}`);
       setVehicles(prev => prev.filter(v => v.id !== id));
+      if (selectedVehicleId === id) {
+        setSelectedVehicleId(null);
+      }
     } catch {
       setError(t("deleteFailed"));
     }
@@ -71,7 +75,7 @@ export function Vehicles({ onLogout }: Props) {
       <header style={headerCard}>
         <div>
           <p style={eyebrow}>AUTOTRACK IOS</p>
-          <h1 style={title}>My Vehicles</h1>
+          <h1 style={title}>{t("vehicles")}</h1>
         </div>
 
         <div style={headerActions}>
@@ -95,6 +99,10 @@ export function Vehicles({ onLogout }: Props) {
           key={vehicle.id}
           vehicle={vehicle}
           onDelete={handleDelete}
+          isSelected={selectedVehicleId === vehicle.id}
+          onSelect={() => {
+            setSelectedVehicleId((prev) => (prev === vehicle.id ? null : vehicle.id));
+          }}
         />
       ))}
       </section>

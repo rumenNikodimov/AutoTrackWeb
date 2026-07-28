@@ -7,7 +7,7 @@ i18n.use(initReactI18next).init({
   resources: {
     en: {
       translation: {
-        vehicles: "My Vehicles",
+        vehicles: "Garage",
         dashboard: "Dashboard",
         addEntry: "Add entry",
         entryLog: "Entry log",
@@ -15,6 +15,15 @@ i18n.use(initReactI18next).init({
         delete: "Delete",
         loading: "Loading...",
         noVehicles: "No vehicles found.",
+        notAvailable: "N/A",
+        year: "Year",
+        currentMileage: "Current mileage",
+        upcomingEvent: "Upcoming event",
+        noUpcomingEvent: "No upcoming event",
+        dueOnDate: "Due on {{date}}",
+        dueAtKm: "Due at {{km}} km",
+        tapCardToShowActions: "Tap card to show actions",
+        openActions: "Open actions",
         logout: "Logout",
         addVehicle: "Add Vehicle",
         deleteVehicleConfirm:
@@ -122,7 +131,7 @@ i18n.use(initReactI18next).init({
     },
     bg: {
       translation: {
-        vehicles: "Моите коли",
+        vehicles: "Гараж",
         dashboard: "Табло",
         addEntry: "Добави запис",
         entryLog: "История на записите",
@@ -130,6 +139,15 @@ i18n.use(initReactI18next).init({
         delete: "Изтрий",
         loading: "Зареждане...",
         noVehicles: "Няма добавени коли.",
+        notAvailable: "Няма",
+        year: "Година",
+        currentMileage: "Текущ пробег",
+        upcomingEvent: "Предстоящо събитие",
+        noUpcomingEvent: "Няма предстоящо събитие",
+        dueOnDate: "Краен срок: {{date}}",
+        dueAtKm: "Краен пробег: {{km}} км",
+        tapCardToShowActions: "Натисни картата за действия",
+        openActions: "Отвори действия",
         logout: "Изход",
         addVehicle: "Добави автомобил",
         deleteVehicleConfirm:
