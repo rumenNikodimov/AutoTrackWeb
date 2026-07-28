@@ -98,43 +98,45 @@ export function EntryList({ vehicleId }: Props) {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                fontSize: 13,
-                minWidth: 0,
-                flex: 1,
-              }}
-            >
-              <span style={{ fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", flexShrink: 0 }}>
-                {t(getEntryTypeKey(e.type) || "")}
-              </span>
-
-              <span
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div
                 style={{
-                  opacity: 0.8,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                  minWidth: 0,
+                  fontSize: 14,
                 }}
-                title={`${
-                  e.type !== EntryType.InsuranceType && e.type !== EntryType.VignetteType
-                    ? `${e.odometerKm} km • `
-                    : ""
-                }${new Date(e.occurredAt).toLocaleDateString()} • ${
-                  e.type === EntryType.ElectricType ? "⚡" : "⛽"
-                } ${e.amount} ${e.type === EntryType.ElectricType ? "kWh" : "L"} • 💰 ${e.totalPrice.toFixed(2)} ${t("currency")}`}
               >
-                {e.type !== EntryType.InsuranceType && e.type !== EntryType.VignetteType
-                  ? `${e.odometerKm} km • `
-                  : ""}
-                {new Date(e.occurredAt).toLocaleDateString()} • {e.type === EntryType.ElectricType ? "⚡" : "⛽"} {e.amount} {e.type === EntryType.ElectricType ? "kWh" : "L"} • 💰 {e.totalPrice.toFixed(2)} {t("currency")}
-              </span>
+                <span style={{ fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", flexShrink: 0 }}>
+                  {t(getEntryTypeKey(e.type) || "")}
+                </span>
+
+                {e.type !== EntryType.InsuranceType && e.type !== EntryType.VignetteType ? (
+                  <span style={{ opacity: 0.9, fontWeight: 600, flexShrink: 0 }}>
+                    {e.odometerKm} km
+                  </span>
+                ) : null}
+
+                <span style={{ opacity: 0.7, fontSize: 12, overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {new Date(e.occurredAt).toLocaleDateString()}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 3,
+                  fontSize: 13,
+                  opacity: 0.9,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {e.type === EntryType.ElectricType ? "⚡" : "⛽"} {e.amount} {e.type === EntryType.ElectricType ? "kWh" : "L"} • 💰 {e.totalPrice.toFixed(2)} {t("currency")}
+              </div>
             </div>
 
             <button
