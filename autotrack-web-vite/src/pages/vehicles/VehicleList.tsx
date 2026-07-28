@@ -82,12 +82,12 @@ export function Vehicles({ onLogout }: Props) {
 
       <section style={listWrap}>
 
-      {loading && <p>{t("loading")}</p>}
+      {loading && <p style={stateCard}>{t("loading")}</p>}
 
-      {error && <p style={{ color: "#f87171" }}>{error}</p>}
+      {error && <p style={errorCard}>{error}</p>}
 
       {!loading && !error && vehicles.length === 0 && (
-        <p>{t("noVehicles")}</p>
+        <p style={stateCard}>{t("noVehicles")}</p>
       )}
 
       {vehicles.map((vehicle) => (
@@ -171,6 +171,23 @@ const listWrap: React.CSSProperties = {
   display: "flex",
   flexDirection: "column",
   gap: 2,
+};
+
+const stateCard: React.CSSProperties = {
+  margin: "6px 0 10px",
+  padding: "14px 12px",
+  borderRadius: 14,
+  border: "1px solid var(--ui-btn-border)",
+  background: "var(--ui-card-bg)",
+  color: "var(--ui-text-main)",
+  fontSize: 14,
+  textAlign: "center",
+};
+
+const errorCard: React.CSSProperties = {
+  ...stateCard,
+  color: "#f87171",
+  border: "1px solid rgba(248,113,113,0.4)",
 };
 
 const bottomActions: React.CSSProperties = {
