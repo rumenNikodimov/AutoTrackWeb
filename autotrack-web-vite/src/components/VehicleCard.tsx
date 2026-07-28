@@ -388,31 +388,25 @@ const dot: React.CSSProperties = {
 
 const inlineMenuRow: React.CSSProperties = {
   display: "flex",
-  justifyContent: "flex-end",
+  justifyContent: "stretch",
   gap: 8,
   marginTop: 8,
   marginBottom: 2,
-  paddingRight: 2,
+  width: "100%",
 };
 
 const inlineActionBtn: React.CSSProperties = {
-  minWidth: 94,
-  minHeight: 42,
-  padding: "9px 14px",
+  ...secondaryBtn,
+  flex: "1 1 120px",
+  minWidth: 0,
+  minHeight: 46,
+  padding: "11px 12px",
   borderRadius: 12,
-  border: "1px solid var(--ui-btn-border)",
-  background: "var(--ui-btn-bg)",
-  color: "var(--ui-btn-text)",
-  cursor: "pointer",
-  fontSize: 14,
-  fontWeight: 600,
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.07)",
+  textAlign: "center",
 };
 
 const inlineEditBtn: React.CSSProperties = {
   ...inlineActionBtn,
-  border: "1px solid rgba(59,130,246,0.5)",
-  background: "linear-gradient(180deg, rgba(59,130,246,0.25), rgba(37,99,235,0.18))",
 };
 
 const inlineDeleteBtn: React.CSSProperties = {

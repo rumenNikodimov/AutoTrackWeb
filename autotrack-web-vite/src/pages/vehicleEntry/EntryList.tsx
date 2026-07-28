@@ -50,6 +50,7 @@ export function EntryList({ vehicleId }: Props) {
 
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openMenuEntryId, setOpenMenuEntryId] = useState<number | null>(null);
 
   const { t } = useTranslation();
   useEffect(() => {
@@ -89,44 +90,85 @@ export function EntryList({ vehicleId }: Props) {
           key={e.id}
           style={{
             background: "#1e293b",
-            padding: 15,
+            padding: "10px 12px",
             borderRadius: 12,
-            marginBottom: 12,
+            marginBottom: 8,
             animation: "fadeIn 0.3s ease",
-            animationDelay: `${i * 0.05}s`
+            animationDelay: `${i * 0.05}s`,
           }}
         >
-          <span>
-            {t(getEntryTypeKey(e.type) || "")}
-          </span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                fontSize: 15,
+                minWidth: 0,
+                flex: 1,
+              }}
+            >
+              <span style={{ fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis" }}>
+                {t(getEntryTypeKey(e.type) || "")}
+              </span>
 
-          <div>
-            {e.type !== EntryType.InsuranceType && e.type !== EntryType.VignetteType
-              ? (
-                <strong>{e.odometerKm} km</strong>
-              )
-              : null}
-            <div style={{ fontSize: 13, opacity: 0.7 }}>
-              {new Date(e.occurredAt).toLocaleDateString()}
+              {e.type !== EntryType.InsuranceType && e.type !== EntryType.VignetteType ? (
+                <span style={{ opacity: 0.9, fontWeight: 600 }}>
+                  {e.odometerKm} km
+                </span>
+              ) : null}
+
+              <span style={{ opacity: 0.65, fontSize: 12 }}>
+                {new Date(e.occurredAt).toLocaleDateString()}
+              </span>
+
+              {e.type === EntryType.ElectricType ? "⚡" : "⛽"} {e.amount} {e.type === EntryType.ElectricType ? "kWh" : "L"} • 💰 {e.totalPrice.toFixed(2)} {t("currency")}
             </div>
-          </div>
-          
-          <div style={{ marginTop: 5 }}>
-            {e.type === EntryType.ElectricType ? "⚡" : "⛽"}{" "}
-            {e.amount} {e.type === EntryType.ElectricType ? "kWh" : "L"} • 💰{" "}
-            {e.totalPrice.toFixed(2)} {t("currency")}
+
+            <button
+              type="button"
+              aria-label={t("openActions")}
+              aria-haspopup="menu"
+              aria-expanded={openMenuEntryId === e.id}
+              {...createHoverHandlers("rgba(59,130,246,0.6)")}
+              onClick={() => {
+                setOpenMenuEntryId((prev) => (prev === e.id ? null : e.id));
+              }}
+              style={{
+                width: 34,
+                height: 34,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 3,
+                borderRadius: 9,
+                border: "1px solid rgba(148,163,184,0.38)",
+                background: "#334155",
+                color: "white",
+                flexShrink: 0,
+                cursor: "pointer",
+              }}
+            >
+              <span style={{ width: 4, height: 4, borderRadius: "50%", background: "#e2e8f0" }} />
+              <span style={{ width: 4, height: 4, borderRadius: "50%", background: "#e2e8f0" }} />
+              <span style={{ width: 4, height: 4, borderRadius: "50%", background: "#e2e8f0" }} />
+            </button>
           </div>
 
-          {/* ✅ ACTIONS */}
-          <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
-            <AnimatedBtn onClick={() => navigate(`/entries/edit/${e.id}`)}>
-              ✏️
-            </AnimatedBtn>
+          {openMenuEntryId === e.id && (
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }} role="menu">
+              <MenuActionBtn onClick={() => navigate(`/entries/edit/${e.id}`)}>
+                {t("edit")}
+              </MenuActionBtn>
 
-            <AnimatedBtn danger onClick={() => handleDelete(e.id)}>
-              🗑
-            </AnimatedBtn>
-          </div>
+              <MenuActionBtn danger onClick={() => handleDelete(e.id)}>
+                {t("delete")}
+              </MenuActionBtn>
+            </div>
+          )}
         </div>
       ))}
 
@@ -188,27 +230,32 @@ export function EntryList({ vehicleId }: Props) {
   );
 }
 
-/* ✅ Animated Button */
-function AnimatedBtn({
+function MenuActionBtn({
   children,
   onClick,
-  danger
-}: any) {
+  danger,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  danger?: boolean;
+}) {
   return (
     <button
+      type="button"
       onClick={onClick}
       {...createHoverHandlers("rgba(59,130,246,0.6)")}
       style={{
+        flex: 1,
+        minHeight: 40,
         padding: "8px 12px",
         borderRadius: 10,
-        border: "none",
-        background: danger ? "#dc2626" : "#334155",
-        color: "white",
-        fontSize: 16,
-        transition: "transform 0.1s"
+        border: danger ? "1px solid rgba(239,68,68,0.55)" : "1px solid rgba(148,163,184,0.38)",
+        background: danger ? "rgba(239,68,68,0.2)" : "#334155",
+        color: danger ? "#fecaca" : "white",
+        fontSize: 14,
+        fontWeight: 600,
+        cursor: "pointer",
       }}
-      onTouchStart={e => (e.currentTarget.style.transform = "scale(0.9)")}
-      onTouchEnd={e => (e.currentTarget.style.transform = "scale(1)")}
     >
       {children}
     </button>
