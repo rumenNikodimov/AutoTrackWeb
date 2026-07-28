@@ -14,6 +14,17 @@ type Vehicle = {
   model: string;
   year: number;
   licensePlate: string;
+  currentMileageKm?: number;
+  currentMileage?: number;
+  odometerKm?: number;
+  odometer?: number;
+  mileageKm?: number;
+  mileage?: number;
+  upcomingEvent?: string;
+  upcomingNotification?: string;
+  nextEventTitle?: string;
+  nextDueDate?: string;
+  nextDueKm?: number;
 };
 
 type Props = {
@@ -43,7 +54,15 @@ export function Vehicles({ onLogout }: Props) {
   useEffect(() => {
     apiGet<Vehicle[]>("vehicles")
       .then(setVehicles)
-      .catch(() => setError(t("loadVehiclesError")))
+      .catch((err) => {
+          console.error("Vehicles error:", err);
+           
+          setError(
+            `${err?.response?.status ?? ""} ${
+            err?.response?.data ?? err?.message ?? t("loadVehicleError")
+            }`
+          );
+        })
       .finally(() => setLoading(false));
   }, []);
 

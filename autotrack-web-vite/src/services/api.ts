@@ -5,8 +5,9 @@ import axios from "axios";
 //const API_BASE_URL = "https://localhost:7071/api"; //Локален SSL (може да има проблеми с сертификата в браузъра)
 //const API_BASE_URL = "http://192.168.1.3:7071/api";
 
-const API_BASE_URL = "https://autotrackapi1.onrender.com/api";
-//const API_BASE_URL = "https://autotrackapi.onrender.com/api";
+//const API_BASE_URL = "https://autotrackapi1.onrender.com/api";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 //alert(`API BASE URL: ${API_BASE_URL}`);
 

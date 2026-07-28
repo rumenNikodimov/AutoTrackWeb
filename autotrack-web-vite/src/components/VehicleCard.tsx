@@ -13,6 +13,27 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  const currentMileage =
+    vehicle.currentMileageKm ??
+    vehicle.currentMileage ??
+    vehicle.odometerKm ??
+    vehicle.odometer ??
+    vehicle.mileageKm ??
+    vehicle.mileage;
+
+  const mileageText =
+    typeof currentMileage === "number" && Number.isFinite(currentMileage)
+      ? `${new Intl.NumberFormat("en-US").format(currentMileage)} km`
+      : "N/A";
+
+  const upcomingEvent =
+    vehicle.upcomingEvent ??
+    vehicle.upcomingNotification ??
+    vehicle.nextEventTitle ??
+    (vehicle.nextDueDate ? `Due on ${new Date(vehicle.nextDueDate).toLocaleDateString()}` : null) ??
+    (vehicle.nextDueKm ? `Due at ${vehicle.nextDueKm} km` : null) ??
+    "No upcoming event";
+
   const goTo = (path: string) => {
     storeVehicleId(vehicle.id);
     navigate(path);
@@ -36,6 +57,10 @@ export function VehicleCard({ vehicle, onDelete }: Props) {
         <div style={meta}>Plate: {vehicle.licensePlate}</div>
 
         <div style={metaSecondary}>Year: {vehicle.year}</div>
+
+        <div style={meta}>Current mileage: {mileageText}</div>
+
+        <div style={metaSecondary}>Upcoming event: {upcomingEvent}</div>
       </div>
 
       {/* ✅ separator */}
