@@ -43,6 +43,14 @@ export function MobileNav() {
       </NavBtn>
 
       <NavBtn
+        active={location.pathname.includes("/reminders")}
+        label="Reminders"
+        onClick={() => navigate(`/vehicles/${vehicleId}/reminders`)}
+      >
+        <BellIcon />
+      </NavBtn>
+
+      <NavBtn
         active={location.pathname.includes("/vehicles/edit")}
         label="Profile"
         onClick={() => navigate(`/vehicles/edit/${vehicleId}`)}
@@ -186,6 +194,15 @@ function ProfileIcon() {
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8">
       <circle cx="12" cy="8" r="3.5" />
       <path d="M5 20a7 7 0 0 1 14 0" />
+    </svg>
+  );
+}
+
+function BellIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M6 9a6 6 0 0 1 12 0v4l2 3H4l2-3V9" />
+      <path d="M10 19a2 2 0 0 0 4 0" />
     </svg>
   );
 }

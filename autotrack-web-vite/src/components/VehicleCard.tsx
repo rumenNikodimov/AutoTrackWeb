@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { createHoverHandlers } from "../utils/uiHandlers";
 import { useTranslation } from "react-i18next";
 import { storeVehicleId } from "../utils/vehicleSession";
+import { CreateReminderModal } from "./CreateReminderModal";
+import type { Reminder } from "../types/Reminder";
+import { getReminderTypeKey } from "../types/enums/ReminderType";
+import { getReminderGroup } from "../utils/reminders";
   
 type Props = {
   vehicle: any;
@@ -15,6 +19,7 @@ export function VehicleCard({ vehicle, onDelete, isSelected, onSelect }: Props) 
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [createReminderOpen, setCreateReminderOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const toMileageNumber = (value: unknown): number | null => {
@@ -65,13 +70,22 @@ export function VehicleCard({ vehicle, onDelete, isSelected, onSelect }: Props) 
       ? `${new Intl.NumberFormat("en-US").format(highestMileage)} km`
       : t("notAvailable");
 
-  const upcomingEvent =
-    vehicle.upcomingEvent ??
-    vehicle.upcomingNotification ??
-    vehicle.nextEventTitle ??
-    (vehicle.nextDueDate ? t("dueOnDate", { date: new Date(vehicle.nextDueDate).toLocaleDateString() }) : null) ??
-    (vehicle.nextDueKm ? t("dueAtKm", { km: vehicle.nextDueKm }) : null) ??
-    t("noUpcomingEvent");
+  const previewReminders = ((vehicle.reminders as Reminder[] | undefined) ?? [])
+    .filter((reminder) => !reminder.isCompleted)
+    .sort((left, right) => {
+      const leftGroup = getReminderGroup(left, highestMileage ?? 0);
+      const rightGroup = getReminderGroup(right, highestMileage ?? 0);
+      const groupRank = { overdue: 0, upcoming: 1, completed: 2 } as const;
+      const byGroup = groupRank[leftGroup] - groupRank[rightGroup];
+      if (byGroup !== 0) return byGroup;
+
+      const leftDue = left.dueDate ? new Date(left.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+      const rightDue = right.dueDate ? new Date(right.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+      if (leftDue !== rightDue) return leftDue - rightDue;
+
+      return (left.dueKm ?? Number.MAX_SAFE_INTEGER) - (right.dueKm ?? Number.MAX_SAFE_INTEGER);
+    })
+    .slice(0, 2);
 
   const goTo = (path: string) => {
     storeVehicleId(vehicle.id);
@@ -121,7 +135,22 @@ export function VehicleCard({ vehicle, onDelete, isSelected, onSelect }: Props) 
           <InfoItem label={t("licensePlate")} value={vehicle.licensePlate || t("notAvailable")} />
           <InfoItem label={t("year")} value={String(vehicle.year || t("notAvailable"))} />
           <InfoItem label={`${t("currentMileage")} |`} value={mileageText} />
-          <InfoItem label={t("upcomingEvent")} value={upcomingEvent} />
+          <InfoItem
+            label={t("reminders")}
+            value={
+              previewReminders.length > 0 ? (
+                <div style={reminderList}>
+                  {previewReminders.map((reminder) => (
+                    <span key={reminder.id} style={reminderLine} title={reminder.title}>
+                      {reminder.title || t(getReminderTypeKey(reminder.reminderType))}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                t("none")
+              )
+            }
+          />
         </div>
 
         {!isSelected && (
@@ -173,6 +202,30 @@ export function VehicleCard({ vehicle, onDelete, isSelected, onSelect }: Props) 
             <button
               type="button"
               {...createHoverHandlers("rgba(107,114,128,0.6)")}
+              style={secondaryBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                goTo(`/vehicles/${vehicle.id}/reminders`);
+              }}
+            >
+              {t("reminders")}
+            </button>
+
+            <button
+              type="button"
+              {...createHoverHandlers("rgba(107,114,128,0.6)")}
+              style={secondaryBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                setCreateReminderOpen(true);
+              }}
+            >
+              {t("createReminder")}
+            </button>
+
+            <button
+              type="button"
+              {...createHoverHandlers("rgba(107,114,128,0.6)")}
               style={menuBtnInRow}
               onClick={(e) => {
                 e.stopPropagation();
@@ -217,15 +270,25 @@ export function VehicleCard({ vehicle, onDelete, isSelected, onSelect }: Props) 
           )}
         </>
       )}
+
+      <CreateReminderModal
+        open={createReminderOpen}
+        vehicleId={vehicle.id}
+        onClose={() => setCreateReminderOpen(false)}
+      />
     </div>
   );
 }
 
-function InfoItem({ label, value }: { label: string; value: string }) {
+function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div style={infoItem}>
       <span style={infoLabel}>{label}</span>
-      <span style={infoValue} title={value}>{value}</span>
+      {typeof value === "string" ? (
+        <span style={infoValue} title={value}>{value}</span>
+      ) : (
+        <div style={infoNodeValue}>{value}</div>
+      )}
     </div>
   );
 }
@@ -307,6 +370,30 @@ const infoValue: React.CSSProperties = {
   overflow: "hidden",
   textOverflow: "ellipsis",
   maxWidth: "100%",
+};
+
+const infoNodeValue: React.CSSProperties = {
+  width: "100%",
+  display: "flex",
+  justifyContent: "center",
+};
+
+const reminderList: React.CSSProperties = {
+  width: "100%",
+  display: "flex",
+  flexDirection: "column",
+  gap: 2,
+  alignItems: "center",
+};
+
+const reminderLine: React.CSSProperties = {
+  maxWidth: "100%",
+  fontSize: 12,
+  color: "var(--ui-text-main)",
+  fontWeight: 600,
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
 };
 
 const hintText: React.CSSProperties = {

@@ -7,6 +7,8 @@ import { createHoverHandlers } from "../../utils/uiHandlers";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 import { ThemeToggle } from "../../components/ThemeToggle";
+import { getVehicleReminders } from "../../services/reminders";
+import type { Reminder } from "../../types/Reminder";
 
 type Vehicle = {
   id: number;
@@ -20,6 +22,7 @@ type Vehicle = {
   odometer?: number;
   mileageKm?: number;
   mileage?: number;
+  reminders?: Reminder[];
   upcomingEvent?: string;
   upcomingNotification?: string;
   nextEventTitle?: string;
@@ -94,6 +97,7 @@ export function Vehicles({ onLogout }: Props) {
         const withMileage = await Promise.all(
           baseVehicles.map(async (vehicle) => {
             let entryMileageCandidates: number[] = [];
+            let reminders: Reminder[] = [];
 
             try {
               const entries = await apiGet<EntryLike[]>(`entries/vehicle/${vehicle.id}`);
@@ -102,6 +106,12 @@ export function Vehicles({ onLogout }: Props) {
               );
             } catch {
               entryMileageCandidates = [];
+            }
+
+            try {
+              reminders = await getVehicleReminders(vehicle.id);
+            } catch {
+              reminders = [];
             }
 
             const vehicleMileageCandidates = collectMileageCandidates(
@@ -114,6 +124,7 @@ export function Vehicles({ onLogout }: Props) {
             return {
               ...vehicle,
               currentMileageKm: highestMileage ?? vehicle.currentMileageKm,
+              reminders,
             };
           })
         );

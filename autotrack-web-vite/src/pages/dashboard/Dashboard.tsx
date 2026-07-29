@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { apiGet } from "../../services/api";
 import { useTranslation } from "react-i18next";
+import type { Reminder } from "../../types/Reminder";
+import { getVehicleReminders } from "../../services/reminders";
+import { getReminderGroup } from "../../utils/reminders";
 
 import {
   LineChart,
@@ -24,16 +27,25 @@ type Entry = {
 
 export function Dashboard({ vehicleId }: { vehicleId: number }) {
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(true);
 
   const { t } = useTranslation();
 
   useEffect(() => {
-    apiGet<Entry[]>(`entries/vehicle/${vehicleId}`)
-      .then((data) => setEntries(data))
-      .catch((err) => {
-        console.error("ERROR:", err);
-        setEntries([]);
+    Promise.all([
+      apiGet<Entry[]>(`entries/vehicle/${vehicleId}`).catch((err) => {
+        console.error("Entries error:", err);
+        return [] as Entry[];
+      }),
+      getVehicleReminders(vehicleId).catch((err) => {
+        console.error("Reminders error:", err);
+        return [] as Reminder[];
+      }),
+    ])
+      .then(([entryData, reminderData]) => {
+        setEntries(entryData);
+        setReminders(reminderData);
       })
       .finally(() => setLoading(false));
   }, [vehicleId]);
@@ -82,6 +94,16 @@ export function Dashboard({ vehicleId }: { vehicleId: number }) {
 
   const lastConsumption = consumptionData.at(-1);
 
+  const currentMileage =
+    sorted.length > 0 ? sorted[sorted.length - 1].odometerKm : 0;
+
+  const overdueReminders = reminders.filter(
+    (r) => getReminderGroup(r, currentMileage) === "overdue"
+  );
+  const upcomingReminders = reminders.filter(
+    (r) => getReminderGroup(r, currentMileage) === "upcoming"
+  );
+
   if (loading) return <p style={{ padding: 20 }}>Loading...</p>;
 
   return (
@@ -100,7 +122,31 @@ export function Dashboard({ vehicleId }: { vehicleId: number }) {
         <Card title={`⛽ ${t("fuel")}`} value={`${totalFuel.toFixed(2)} L`} />
         <Card title={`📉 ${t("avg")}`} value={`${avgConsumption} L/100km`} />
         <Card title={`📄 ${t("entries")}`} value={fuelEntries.length.toString()} />
+        <Card title={`🔔 ${t("reminders")}`} value={`${reminders.length}`} />
+        <Card title={`⚠️ ${t("overdue")}`} value={`${overdueReminders.length}`} />
       </div>
+
+      {(overdueReminders.length > 0 || upcomingReminders.length > 0) && (
+        <div style={{ marginTop: 14 }}>
+          {overdueReminders.length > 0 && (
+            <div style={warningCard}>
+              <strong>{t("overdue")}</strong>
+              {overdueReminders.map((r) => (
+                <div key={r.id} style={smallLine}>• {r.title}</div>
+              ))}
+            </div>
+          )}
+
+          {upcomingReminders.length > 0 && (
+            <div style={upcomingCard}>
+              <strong>{t("upcoming")}</strong>
+              {upcomingReminders.map((r) => (
+                <div key={r.id} style={smallLine}>• {r.title}</div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ✅ ALERT */}
       {lastConsumption && lastConsumption.consumption > 10 && (
@@ -168,6 +214,27 @@ export function Dashboard({ vehicleId }: { vehicleId: number }) {
     </div>
   );
 }
+
+const warningCard: React.CSSProperties = {
+  marginTop: 8,
+  background: "rgba(127,29,29,0.35)",
+  border: "1px solid rgba(248,113,113,0.45)",
+  borderRadius: 10,
+  padding: 10,
+};
+
+const upcomingCard: React.CSSProperties = {
+  marginTop: 8,
+  background: "rgba(30,64,175,0.28)",
+  border: "1px solid rgba(96,165,250,0.4)",
+  borderRadius: 10,
+  padding: 10,
+};
+
+const smallLine: React.CSSProperties = {
+  fontSize: 13,
+  marginTop: 4,
+};
 
 function Card({ title, value }: { title: string; value: string }) {
   return (

@@ -15,6 +15,7 @@ import { EditVehicle } from "./pages/vehicles/EditVehicle";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { useEffect } from "react";
 import { apiGet } from "./services/api";
+import { ReminderList } from "./pages/reminders/ReminderList";
 
 
 function EntryWrapper() {
@@ -140,6 +141,15 @@ function App() {
           element={
             <ProtectedRoute isAuth={isAuth === true}>
               <EditVehicle />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/vehicles/:vehicleId/reminders"
+          element={
+            <ProtectedRoute isAuth={isAuth === true}>
+              <ReminderList />
             </ProtectedRoute>
           }
         />
