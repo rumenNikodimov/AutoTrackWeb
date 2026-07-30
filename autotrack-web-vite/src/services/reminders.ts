@@ -1,7 +1,9 @@
 import { apiDelete, apiGet, apiPost, apiPut } from "./api";
 import type {
+  ReminderDashboardResponse,
   Reminder,
   ReminderCreateRequest,
+  VehicleReminderSummary,
   ReminderUpdateRequest,
 } from "../types/Reminder";
 
@@ -15,6 +17,18 @@ export function getVehicleReminders(vehicleId: number) {
 
 export function getUpcomingReminders() {
   return apiGet<Reminder[]>("reminders/upcoming");
+}
+
+export function getReminderDashboard() {
+  return apiGet<ReminderDashboardResponse>("reminders/dashboard");
+}
+
+export function getOverdueReminders() {
+  return apiGet<Reminder[]>("reminders/overdue");
+}
+
+export function getVehicleReminderSummary(vehicleId: number) {
+  return apiGet<VehicleReminderSummary>(`reminders/vehicle/${vehicleId}/summary`);
 }
 
 export function createReminder(payload: ReminderCreateRequest) {

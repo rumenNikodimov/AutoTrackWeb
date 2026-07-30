@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { apiGet } from "../../services/api";
 import { useTranslation } from "react-i18next";
-import type { Reminder } from "../../types/Reminder";
-import { getVehicleReminders } from "../../services/reminders";
-import { getReminderGroup } from "../../utils/reminders";
+import type { Reminder, ReminderDashboardResponse } from "../../types/Reminder";
+import { getReminderDashboard } from "../../services/reminders";
 
 import {
   LineChart,
@@ -27,7 +26,12 @@ type Entry = {
 
 export function Dashboard({ vehicleId }: { vehicleId: number }) {
   const [entries, setEntries] = useState<Entry[]>([]);
-  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [dashboardReminders, setDashboardReminders] = useState<{
+    overdue: Reminder[];
+    upcoming: Reminder[];
+    overdueCount: number;
+    upcomingCount: number;
+  }>({ overdue: [], upcoming: [], overdueCount: 0, upcomingCount: 0 });
   const [loading, setLoading] = useState(true);
 
   const { t } = useTranslation();
@@ -38,14 +42,27 @@ export function Dashboard({ vehicleId }: { vehicleId: number }) {
         console.error("Entries error:", err);
         return [] as Entry[];
       }),
-      getVehicleReminders(vehicleId).catch((err) => {
+      getReminderDashboard().catch((err): ReminderDashboardResponse => {
         console.error("Reminders error:", err);
-        return [] as Reminder[];
+        return {
+          overdue: [],
+          upcoming: [],
+          overdueCount: 0,
+          upcomingCount: 0,
+        };
       }),
     ])
       .then(([entryData, reminderData]) => {
         setEntries(entryData);
-        setReminders(reminderData);
+
+        const overdue = reminderData.overdueReminders ?? reminderData.overdue ?? [];
+        const upcoming = reminderData.upcomingReminders ?? reminderData.upcoming ?? [];
+        setDashboardReminders({
+          overdue,
+          upcoming,
+          overdueCount: reminderData.overdueCount ?? overdue.length,
+          upcomingCount: reminderData.upcomingCount ?? upcoming.length,
+        });
       })
       .finally(() => setLoading(false));
   }, [vehicleId]);
@@ -97,12 +114,26 @@ export function Dashboard({ vehicleId }: { vehicleId: number }) {
   const currentMileage =
     sorted.length > 0 ? sorted[sorted.length - 1].odometerKm : 0;
 
-  const overdueReminders = reminders.filter(
-    (r) => getReminderGroup(r, currentMileage) === "overdue"
-  );
-  const upcomingReminders = reminders.filter(
-    (r) => getReminderGroup(r, currentMileage) === "upcoming"
-  );
+  const overdueReminders = dashboardReminders.overdue
+    .slice(0, 5);
+  const completedReminders = (
+    dashboardReminders.overdue.concat(dashboardReminders.upcoming)
+  ).filter((r) => r.isCompleted).slice(0, 5);
+  const upcomingReminders = dashboardReminders.upcoming
+    .filter((r) => !r.isCompleted)
+    .sort((left, right) => {
+      const leftDate = left.dueDate ? new Date(left.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+      const rightDate = right.dueDate ? new Date(right.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
+      if (leftDate !== rightDate) return leftDate - rightDate;
+
+      const leftKmRemaining =
+        typeof left.dueKm === "number" ? Math.max(left.dueKm - currentMileage, 0) : Number.MAX_SAFE_INTEGER;
+      const rightKmRemaining =
+        typeof right.dueKm === "number" ? Math.max(right.dueKm - currentMileage, 0) : Number.MAX_SAFE_INTEGER;
+
+      return leftKmRemaining - rightKmRemaining;
+    })
+    .slice(0, 5);
 
   if (loading) return <p style={{ padding: 20 }}>Loading...</p>;
 
@@ -122,27 +153,68 @@ export function Dashboard({ vehicleId }: { vehicleId: number }) {
         <Card title={`⛽ ${t("fuel")}`} value={`${totalFuel.toFixed(2)} L`} />
         <Card title={`📉 ${t("avg")}`} value={`${avgConsumption} L/100km`} />
         <Card title={`📄 ${t("entries")}`} value={fuelEntries.length.toString()} />
-        <Card title={`🔔 ${t("reminders")}`} value={`${reminders.length}`} />
-        <Card title={`⚠️ ${t("overdue")}`} value={`${overdueReminders.length}`} />
+        <Card title={`🔔 ${t("reminders")}`} value={`${dashboardReminders.overdueCount + dashboardReminders.upcomingCount}`} />
+        <Card title={`⚠️ ${t("overdue")}`} value={`${dashboardReminders.overdueCount}`} />
       </div>
 
       {(overdueReminders.length > 0 || upcomingReminders.length > 0) && (
-        <div style={{ marginTop: 14 }}>
+        <div style={summaryWidget}>
+          <div style={summaryHeader}>{t("reminderSummary")}</div>
+          <div style={summaryCounters}>
+            <span style={summaryChip}>🔔 {dashboardReminders.overdueCount + dashboardReminders.upcomingCount} {t("reminders")}</span>
+            <span style={summaryChip}>⚠️ {dashboardReminders.overdueCount} {t("overdue")}</span>
+            <span style={summaryChip}>🟡 {dashboardReminders.upcomingCount} {t("upcoming")}</span>
+            <span style={summaryChip}>✅ {completedReminders.length} {t("completed")}</span>
+          </div>
+
           {overdueReminders.length > 0 && (
             <div style={warningCard}>
               <strong>{t("overdue")}</strong>
-              {overdueReminders.map((r) => (
-                <div key={r.id} style={smallLine}>• {r.title}</div>
-              ))}
+              {overdueReminders.slice(0, 5).map((r) => {
+                const overdueDays = r.dueDate
+                  ? Math.max(Math.ceil((Date.now() - new Date(r.dueDate).getTime()) / 86400000), 0)
+                  : null;
+                const overdueKm = typeof r.dueKm === "number" ? Math.max(currentMileage - r.dueKm, 0) : null;
+
+                return (
+                  <div key={r.id} style={reminderRow}>
+                    <div style={smallLine}>• {r.title}</div>
+                    {overdueDays !== null && overdueDays > 0 && (
+                      <div style={metaLine}>{t("overdueBy")} {overdueDays} {t("days")}</div>
+                    )}
+                    {overdueKm !== null && overdueKm > 0 && (
+                      <div style={metaLine}>{t("overdueBy")} {overdueKm} km</div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 
           {upcomingReminders.length > 0 && (
             <div style={upcomingCard}>
-              <strong>{t("upcoming")}</strong>
-              {upcomingReminders.map((r) => (
-                <div key={r.id} style={smallLine}>• {r.title}</div>
-              ))}
+              <strong>{t("upcomingReminders")}</strong>
+              {upcomingReminders.map((r) => {
+                const dueDate = r.dueDate ? new Date(r.dueDate) : null;
+                const daysRemaining = dueDate
+                  ? Math.max(Math.ceil((dueDate.getTime() - Date.now()) / 86400000), 0)
+                  : null;
+
+                const kmRemaining =
+                  typeof r.dueKm === "number" ? Math.max(r.dueKm - currentMileage, 0) : null;
+
+                return (
+                  <div key={r.id} style={reminderRow}>
+                    <div style={smallLine}>• {r.title}</div>
+                    {daysRemaining !== null && (
+                      <div style={metaLine}>{daysRemaining} {t("days")} {t("remaining")}</div>
+                    )}
+                    {kmRemaining !== null && (
+                      <div style={metaLine}>{kmRemaining} km {t("remaining")}</div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -223,6 +295,37 @@ const warningCard: React.CSSProperties = {
   padding: 10,
 };
 
+const summaryWidget: React.CSSProperties = {
+  marginTop: 14,
+  padding: 10,
+  borderRadius: 12,
+  border: "1px solid rgba(148,163,184,0.35)",
+  background: "rgba(15,23,42,0.5)",
+};
+
+const summaryHeader: React.CSSProperties = {
+  fontSize: 13,
+  fontWeight: 700,
+  color: "#e2e8f0",
+  marginBottom: 8,
+};
+
+const summaryCounters: React.CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 6,
+  marginBottom: 4,
+};
+
+const summaryChip: React.CSSProperties = {
+  fontSize: 12,
+  padding: "3px 8px",
+  borderRadius: 999,
+  border: "1px solid rgba(148,163,184,0.35)",
+  background: "rgba(30,41,59,0.7)",
+  color: "#e2e8f0",
+};
+
 const upcomingCard: React.CSSProperties = {
   marginTop: 8,
   background: "rgba(30,64,175,0.28)",
@@ -234,6 +337,16 @@ const upcomingCard: React.CSSProperties = {
 const smallLine: React.CSSProperties = {
   fontSize: 13,
   marginTop: 4,
+};
+
+const reminderRow: React.CSSProperties = {
+  marginTop: 6,
+};
+
+const metaLine: React.CSSProperties = {
+  fontSize: 12,
+  color: "rgba(226,232,240,0.88)",
+  marginTop: 2,
 };
 
 function Card({ title, value }: { title: string; value: string }) {

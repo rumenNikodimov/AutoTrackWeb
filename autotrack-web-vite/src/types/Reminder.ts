@@ -30,3 +30,25 @@ export type ReminderCreateRequest = {
 };
 
 export type ReminderUpdateRequest = ReminderCreateRequest;
+
+export type ReminderPreview = Partial<Reminder> & {
+  remainingKm?: number | null;
+  remainingDays?: number | null;
+};
+
+export type VehicleReminderSummary = {
+  vehicleId: number;
+  overdueCount: number;
+  upcomingCount: number;
+  completedCount?: number;
+  nextReminder?: ReminderPreview | null;
+};
+
+export type ReminderDashboardResponse = {
+  overdueReminders?: Reminder[];
+  upcomingReminders?: Reminder[];
+  overdue?: Reminder[];
+  upcoming?: Reminder[];
+  overdueCount?: number;
+  upcomingCount?: number;
+};

@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { createPortal } from "react-dom";
-import { createReminder } from "../services/reminders";
+import { createReminder, updateReminder } from "../services/reminders";
 import {
   REMINDER_TYPE_OPTIONS,
   type ReminderType,
@@ -65,6 +65,8 @@ type Props = {
   vehicleId: number;
   onClose: () => void;
   onCreated?: (reminder: Reminder) => void;
+  initialReminder?: Reminder | null;
+  onUpdated?: (reminder: Reminder) => void;
 };
 
 export function CreateReminderModal({
@@ -72,12 +74,14 @@ export function CreateReminderModal({
   vehicleId,
   onClose,
   onCreated,
+  initialReminder,
+  onUpdated,
 }: Props) {
   const { t } = useTranslation();
 
   const [form, setForm] = useState<ReminderCreateRequest>({
     vehicleId,
-    reminderType: 0,
+    reminderType: initialReminder?.reminderType ?? 0,
     title: "",
     description: "",
     dueDate: "",
@@ -87,6 +91,38 @@ export function CreateReminderModal({
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const editing = !!initialReminder;
+
+  useEffect(() => {
+    if (!open) return;
+
+    setError(null);
+    if (initialReminder) {
+      setForm({
+        vehicleId,
+        reminderType: initialReminder.reminderType,
+        title: initialReminder.title || "",
+        description: initialReminder.description || "",
+        dueDate: initialReminder.dueDate ? initialReminder.dueDate.slice(0, 10) : "",
+        dueKm: initialReminder.dueKm ?? undefined,
+        notifyBeforeDays: initialReminder.notifyBeforeDays ?? undefined,
+        notifyBeforeKm: initialReminder.notifyBeforeKm ?? undefined,
+      });
+      return;
+    }
+
+    setForm({
+      vehicleId,
+      reminderType: 0,
+      title: "",
+      description: "",
+      dueDate: "",
+      dueKm: undefined,
+      notifyBeforeDays: undefined,
+      notifyBeforeKm: undefined,
+    });
+  }, [open, initialReminder, vehicleId]);
 
   const canSubmit = useMemo(() => {
     const titleOk = form.title.trim().length > 0;
@@ -111,7 +147,7 @@ export function CreateReminderModal({
   const resetForm = () => {
     setForm({
       vehicleId,
-      reminderType: 0,
+      reminderType: initialReminder?.reminderType ?? 0,
       title: "",
       description: "",
       dueDate: "",
@@ -164,8 +200,14 @@ export function CreateReminderModal({
         notifyBeforeKm: notifyKmProvided ? (form.notifyBeforeKm as number) : undefined,
       };
 
-      const created = await createReminder(payload);
-      onCreated?.(created);
+      if (editing && initialReminder) {
+        const updated = await updateReminder(initialReminder.id, payload);
+        onUpdated?.(updated);
+      } else {
+        const created = await createReminder(payload);
+        onCreated?.(created);
+      }
+
       resetForm();
       onClose();
     } catch (err: unknown) {
@@ -179,7 +221,7 @@ export function CreateReminderModal({
     <div style={overlay} onClick={onClose}>
       <div style={modal} onClick={(e) => e.stopPropagation()}>
         <div style={headRow}>
-          <h3 style={{ margin: 0 }}>{t("createReminder")}</h3>
+          <h3 style={{ margin: 0 }}>{editing ? t("edit") : t("createReminder")}</h3>
           <button type="button" style={closeBtn} onClick={onClose}>
             ×
           </button>

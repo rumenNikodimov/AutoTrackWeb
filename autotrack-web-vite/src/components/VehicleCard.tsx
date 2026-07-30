@@ -4,12 +4,33 @@ import { createHoverHandlers } from "../utils/uiHandlers";
 import { useTranslation } from "react-i18next";
 import { storeVehicleId } from "../utils/vehicleSession";
 import { CreateReminderModal } from "./CreateReminderModal";
-import type { Reminder } from "../types/Reminder";
-import { getReminderTypeKey } from "../types/enums/ReminderType";
+import type { Reminder, ReminderPreview, VehicleReminderSummary } from "../types/Reminder";
 import { getReminderGroup } from "../utils/reminders";
   
 type Props = {
-  vehicle: any;
+  vehicle: {
+    id: number;
+    brand?: string;
+    model?: string;
+    year?: number;
+    licensePlate?: string;
+    currentMileageKm?: number;
+    currentMileage?: number;
+    current_mileage?: number;
+    currentMileageKM?: number;
+    odometerKm?: number;
+    odometer?: number;
+    mileageKm?: number;
+    mileage?: number;
+    kilometers?: number;
+    km?: number;
+    entries?: Array<Record<string, unknown>>;
+    vehicleEntries?: Array<Record<string, unknown>>;
+    history?: Array<Record<string, unknown>>;
+    reminderSummary?: VehicleReminderSummary;
+    nextReminder?: ReminderPreview | null;
+    reminders?: Reminder[];
+  };
   onDelete: (id: number) => void;
   isSelected: boolean;
   onSelect: () => void;
@@ -70,22 +91,42 @@ export function VehicleCard({ vehicle, onDelete, isSelected, onSelect }: Props) 
       ? `${new Intl.NumberFormat("en-US").format(highestMileage)} km`
       : t("notAvailable");
 
-  const previewReminders = ((vehicle.reminders as Reminder[] | undefined) ?? [])
-    .filter((reminder) => !reminder.isCompleted)
-    .sort((left, right) => {
-      const leftGroup = getReminderGroup(left, highestMileage ?? 0);
-      const rightGroup = getReminderGroup(right, highestMileage ?? 0);
-      const groupRank = { overdue: 0, upcoming: 1, completed: 2 } as const;
-      const byGroup = groupRank[leftGroup] - groupRank[rightGroup];
-      if (byGroup !== 0) return byGroup;
+  const summary = vehicle.reminderSummary;
+  const fallbackReminders = (vehicle.reminders ?? []).filter((r) => !r.isCompleted);
+  const fallbackOverdueCount = fallbackReminders.filter(
+    (r) => getReminderGroup(r, highestMileage ?? 0) === "overdue"
+  ).length;
+  const fallbackUpcomingCount = fallbackReminders.filter(
+    (r) => getReminderGroup(r, highestMileage ?? 0) === "upcoming"
+  ).length;
+  const fallbackCompletedCount = (vehicle.reminders ?? []).filter((r) => r.isCompleted).length;
 
-      const leftDue = left.dueDate ? new Date(left.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
-      const rightDue = right.dueDate ? new Date(right.dueDate).getTime() : Number.MAX_SAFE_INTEGER;
-      if (leftDue !== rightDue) return leftDue - rightDue;
+  const overdueCount = summary?.overdueCount ?? fallbackOverdueCount;
+  const upcomingCount = summary?.upcomingCount ?? fallbackUpcomingCount;
+  const completedCount = summary?.completedCount ?? fallbackCompletedCount;
+  const nextReminder = vehicle.nextReminder ?? summary?.nextReminder ?? fallbackReminders[0] ?? null;
 
-      return (left.dueKm ?? Number.MAX_SAFE_INTEGER) - (right.dueKm ?? Number.MAX_SAFE_INTEGER);
-    })
-    .slice(0, 2);
+  const nextReminderTitle = nextReminder?.title || t("noRemindersCreated");
+  const nextReminderRemainingKm =
+    nextReminder && "remainingKm" in nextReminder && typeof nextReminder.remainingKm === "number"
+      ? nextReminder.remainingKm
+      : null;
+  const nextReminderRemainingDays =
+    nextReminder && "remainingDays" in nextReminder && typeof nextReminder.remainingDays === "number"
+      ? nextReminder.remainingDays
+      : null;
+
+  const nextReminderSubline = nextReminder
+    ? typeof nextReminderRemainingKm === "number"
+      ? `${new Intl.NumberFormat("en-US").format(Math.max(nextReminderRemainingKm, 0))} km ${t("remaining")}`
+      : typeof nextReminder.dueKm === "number" && typeof highestMileage === "number"
+      ? `${new Intl.NumberFormat("en-US").format(Math.max(nextReminder.dueKm - highestMileage, 0))} km ${t("remaining")}`
+      : typeof nextReminderRemainingDays === "number"
+      ? `${Math.max(nextReminderRemainingDays, 0)} ${t("days")} ${t("remaining")}`
+      : nextReminder.dueDate
+      ? new Date(nextReminder.dueDate).toLocaleDateString()
+      : t("notAvailable")
+    : t("none");
 
   const goTo = (path: string) => {
     storeVehicleId(vehicle.id);
@@ -138,17 +179,13 @@ export function VehicleCard({ vehicle, onDelete, isSelected, onSelect }: Props) 
           <InfoItem
             label={t("reminders")}
             value={
-              previewReminders.length > 0 ? (
-                <div style={reminderList}>
-                  {previewReminders.map((reminder) => (
-                    <span key={reminder.id} style={reminderLine} title={reminder.title}>
-                      {reminder.title || t(getReminderTypeKey(reminder.reminderType))}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                t("none")
-              )
+              <div style={reminderList}>
+                <span style={reminderSummaryLine}>🔴 {overdueCount}</span>
+                <span style={reminderSummaryLine}>🟡 {upcomingCount}</span>
+                <span style={reminderSummaryLine}>✅ {completedCount} {t("completed")}</span>
+                <span style={reminderLine} title={nextReminderTitle}>{nextReminderTitle}</span>
+                <span style={reminderSubLine}>{nextReminderSubline}</span>
+              </div>
             }
           />
         </div>
@@ -394,6 +431,19 @@ const reminderLine: React.CSSProperties = {
   whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
+};
+
+const reminderSummaryLine: React.CSSProperties = {
+  ...reminderLine,
+  fontSize: 11,
+  fontWeight: 700,
+};
+
+const reminderSubLine: React.CSSProperties = {
+  ...reminderLine,
+  fontSize: 11,
+  color: "var(--ui-text-muted)",
+  fontWeight: 500,
 };
 
 const hintText: React.CSSProperties = {

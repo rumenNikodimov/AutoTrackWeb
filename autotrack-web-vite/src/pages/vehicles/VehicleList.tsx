@@ -7,8 +7,8 @@ import { createHoverHandlers } from "../../utils/uiHandlers";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 import { ThemeToggle } from "../../components/ThemeToggle";
-import { getVehicleReminders } from "../../services/reminders";
-import type { Reminder } from "../../types/Reminder";
+import { getVehicleReminderSummary, getVehicleReminders } from "../../services/reminders";
+import type { Reminder, ReminderPreview, VehicleReminderSummary } from "../../types/Reminder";
 
 type Vehicle = {
   id: number;
@@ -23,11 +23,8 @@ type Vehicle = {
   mileageKm?: number;
   mileage?: number;
   reminders?: Reminder[];
-  upcomingEvent?: string;
-  upcomingNotification?: string;
-  nextEventTitle?: string;
-  nextDueDate?: string;
-  nextDueKm?: number;
+  reminderSummary?: VehicleReminderSummary;
+  nextReminder?: ReminderPreview | null;
 };
 
 type EntryLike = {
@@ -97,6 +94,7 @@ export function Vehicles({ onLogout }: Props) {
         const withMileage = await Promise.all(
           baseVehicles.map(async (vehicle) => {
             let entryMileageCandidates: number[] = [];
+            let reminderSummary: VehicleReminderSummary | null = null;
             let reminders: Reminder[] = [];
 
             try {
@@ -106,6 +104,12 @@ export function Vehicles({ onLogout }: Props) {
               );
             } catch {
               entryMileageCandidates = [];
+            }
+
+            try {
+              reminderSummary = await getVehicleReminderSummary(vehicle.id);
+            } catch {
+              reminderSummary = null;
             }
 
             try {
@@ -124,6 +128,14 @@ export function Vehicles({ onLogout }: Props) {
             return {
               ...vehicle,
               currentMileageKm: highestMileage ?? vehicle.currentMileageKm,
+              reminderSummary: reminderSummary ?? {
+                vehicleId: vehicle.id,
+                overdueCount: 0,
+                upcomingCount: 0,
+                completedCount: 0,
+                nextReminder: null,
+              },
+              nextReminder: reminderSummary?.nextReminder ?? null,
               reminders,
             };
           })
