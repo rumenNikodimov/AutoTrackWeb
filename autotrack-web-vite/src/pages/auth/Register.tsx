@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { apiPost } from "../../services/api";
 import { useTranslation } from "react-i18next";
+import { register } from "../../services/authService";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 export function Register() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ export function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [registered, setRegistered] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -26,6 +28,11 @@ export function Register() {
       return;
     }
 
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError(t("passwordsNotMatch"));
       return;
@@ -34,18 +41,29 @@ export function Register() {
     setLoading(true);
 
     try {
-      await apiPost("auth/register", {
+      await register({
         email: email.trim(),
         password
       });
-
-      navigate("/login");
+      setRegistered(true);
     } catch (err: any) {
-      setError(t("registerFailed"));
+      setError(getApiErrorMessage(err, t("registerFailed")));
     } finally {
       setLoading(false);
     }
   };
+
+  if (registered) {
+    return (
+      <div style={container}>
+        <div style={card}>
+          <h2 style={title}>{t("register")}</h2>
+          <p style={successStyle}>Registration successful. Please check your email to confirm your account.</p>
+          <button type="button" style={btn} onClick={() => navigate("/login")}>Go to Login</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={container}>
@@ -179,6 +197,12 @@ const errorStyle = {
   color: "#f87171",
   marginTop: 12,
   textAlign: "center" as const
+};
+
+const successStyle = {
+  color: "#86efac",
+  marginTop: 12,
+  textAlign: "center" as const,
 };
 
 const footer = {

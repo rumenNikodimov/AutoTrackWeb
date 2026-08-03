@@ -51,9 +51,9 @@ export function MobileNav() {
       </NavBtn>
 
       <NavBtn
-        active={location.pathname.includes("/vehicles/edit")}
+        active={location.pathname.includes("/profile")}
         label="Profile"
-        onClick={() => navigate(`/vehicles/edit/${vehicleId}`)}
+        onClick={() => navigate(`/profile`)}
       >
         <ProfileIcon />
       </NavBtn>

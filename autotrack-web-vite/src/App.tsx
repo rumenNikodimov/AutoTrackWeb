@@ -16,6 +16,10 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { useEffect } from "react";
 import { apiGet } from "./services/api";
 import { ReminderList } from "./pages/reminders/ReminderList";
+import { ConfirmEmail } from "./pages/auth/ConfirmEmail";
+import { ForgotPassword } from "./pages/auth/ForgotPassword";
+import { ResetPassword } from "./pages/auth/ResetPassword";
+import { Profile } from "./pages/profile/Profile";
 
 
 function EntryWrapper() {
@@ -81,6 +85,12 @@ function App() {
         <Route 
           path="/register" 
           element={<Register />} />
+
+        <Route path="/confirm-email" element={<ConfirmEmail />} />
+
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+
+        <Route path="/reset-password" element={<ResetPassword />} />
        
         <Route
           path="/vehicles"
@@ -150,6 +160,15 @@ function App() {
           element={
             <ProtectedRoute isAuth={isAuth === true}>
               <ReminderList />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute isAuth={isAuth === true}>
+              <Profile />
             </ProtectedRoute>
           }
         />

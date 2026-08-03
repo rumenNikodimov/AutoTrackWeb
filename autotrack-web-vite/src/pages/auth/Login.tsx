@@ -1,12 +1,13 @@
 
 import { useState } from "react";
-import { apiPost } from "../../services/api";
 import { useNavigate, Link } from "react-router-dom";
 import { createHoverHandlers } from "../../utils/uiHandlers";
 import { useTranslation } from "react-i18next";
+import { login } from "../../services/authService";
+import { getApiErrorMessage } from "../../utils/apiErrors";
 
 type Props = {
-  onLogin: (result: { message: string }) => void;
+  onLogin: () => void;
 };
 
 export function Login({ onLogin }: Props) {
@@ -26,24 +27,21 @@ export function Login({ onLogin }: Props) {
     setLoading(true);
 
     try {
-      await apiPost("auth/login", {
+      await login({
         email: email.trim(),
         password,
       });
 
-      navigate("/vehicles", { replace: true }); // ✅ prevent back to login
-
-      // ✅ няма token – cookie вече е set-нат
-      onLogin({ message: "Login successful, navigating to vehicles..." });
-      console.log("Login successful, navigating to vehicles...");
+      onLogin();
+      navigate("/vehicles", { replace: true });
       
     } catch (err: any) {
-      const msg =
-        err?.response?.data ||
-        err?.message ||
-        t("loginFailed");
-
-      setError(msg);
+      const msg = getApiErrorMessage(err, t("loginFailed"));
+      if (msg.toLowerCase().includes("email is not confirmed")) {
+        setError("Please confirm your email before logging in.");
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -89,6 +87,12 @@ export function Login({ onLogin }: Props) {
         </form>
 
         {error && <p style={errorStyle}>{error}</p>}
+
+        <p style={footerText}>
+          <Link to="/forgot-password" style={link}>
+            Forgot password?
+          </Link>
+        </p>
 
         <p style={footerText}>
           {t("noAccount")}{" "}
