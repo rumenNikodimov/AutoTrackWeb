@@ -171,6 +171,23 @@ i18n.use(initReactI18next).init({
         WinterTiresChange: "Winter tires change",
         SummerTiresChange: "Summer tires change",
 
+        profile: "Profile",
+        emailConfirmed: "Email confirmed",
+        created: "Created",
+        changePassword: "Change Password",
+        currentPassword: "Current password",
+        newPassword: "New password",
+        confirmNewPassword: "Confirm new password",
+        savingPassword: "Saving...",
+        passwordChanged: "Password changed successfully.",
+        failedLoadProfile: "Failed to load profile.",
+        failedChangePassword: "Failed to change password.",
+        allPasswordFieldsRequired: "All password fields are required.",
+        newPasswordTooShort: "New password must be at least 6 characters.",
+        newPasswordsNotMatch: "New passwords do not match.",
+        yes: "Yes",
+        no: "No",
+
       }
     },
     bg: {
@@ -341,6 +358,24 @@ i18n.use(initReactI18next).init({
         CoolantChange: "Смяна на антифриз",
         WinterTiresChange: "Смяна към зимни гуми",
         SummerTiresChange: "Смяна към летни гуми",
+
+        profile: "Профил",
+        emailConfirmed: "Потвърден имейл",
+        created: "Създаден",
+        changePassword: "Смяна на парола",
+        currentPassword: "Текуща парола",
+        newPassword: "Нова парола",
+        confirmNewPassword: "Потвърди нова парола",
+        savingPassword: "Записване...",
+        passwordChanged: "Паролата е сменена успешно.",
+        failedLoadProfile: "Грешка при зареждане на профила.",
+        failedChangePassword: "Грешка при смяна на паролата.",
+        allPasswordFieldsRequired: "Всички полета за парола са задължителни.",
+        newPasswordTooShort: "Новата парола трябва да е поне 6 символа.",
+        newPasswordsNotMatch: "Новите пароли не съвпадат.",
+        yes: "Да",
+        no: "Не",
+
       }
     }
   },

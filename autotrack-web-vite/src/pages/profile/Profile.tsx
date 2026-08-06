@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { changePassword, getMe, type UserProfile } from "../../services/authService";
 import { getApiErrorMessage } from "../../utils/apiErrors";
 
 export function Profile() {
+  const { t } = useTranslation();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +21,7 @@ export function Profile() {
         setProfile(me);
         setError(null);
       })
-      .catch((err) => setError(getApiErrorMessage(err, "Failed to load profile.")))
+      .catch((err) => setError(getApiErrorMessage(err, t("failedLoadProfile"))))
       .finally(() => setLoading(false));
   }, []);
 
@@ -29,63 +31,63 @@ export function Profile() {
     setError(null);
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      setError("All password fields are required.");
+      setError(t("allPasswordFieldsRequired"));
       return;
     }
 
     if (newPassword.length < 6) {
-      setError("New password must be at least 6 characters.");
+      setError(t("newPasswordTooShort"));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("New passwords do not match.");
+      setError(t("newPasswordsNotMatch"));
       return;
     }
 
     setChanging(true);
     try {
       await changePassword(currentPassword, newPassword);
-      setPasswordMessage("Password changed successfully.");
+      setPasswordMessage(t("passwordChanged"));
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
-      setError(getApiErrorMessage(err, "Failed to change password."));
+      setError(getApiErrorMessage(err, t("failedChangePassword")));
     } finally {
       setChanging(false);
     }
   };
 
   if (loading) {
-    return <p style={{ textAlign: "center", marginTop: 80 }}>Loading...</p>;
+    return <p style={{ textAlign: "center", marginTop: 80 }}>{t("loading")}</p>;
   }
 
   return (
     <div style={container}>
       <div style={card}>
-        <h2 style={title}>Profile</h2>
+        <h2 style={title}>{t("profile")}</h2>
 
         {error && <p style={errorText}>{error}</p>}
         {passwordMessage && <p style={successText}>{passwordMessage}</p>}
 
         {profile && (
           <div style={infoWrap}>
-            <InfoRow label="Email" value={profile.email} />
+            <InfoRow label={t("email")} value={profile.email} />
             <InfoRow
-              label="Email confirmed"
-              value={profile.isEmailConfirmed ? "Yes" : "No"}
+              label={t("emailConfirmed")}
+              value={profile.isEmailConfirmed ? t("yes") : t("no")}
             />
             <InfoRow
-              label="Created"
+              label={t("created")}
               value={new Date(profile.createdAt).toLocaleDateString()}
             />
           </div>
         )}
 
-        <h3 style={subTitle}>Change Password</h3>
+        <h3 style={subTitle}>{t("changePassword")}</h3>
         <form onSubmit={submitChangePassword}>
-          <Field label="Current password">
+          <Field label={t("currentPassword")}>
             <input
               type="password"
               value={currentPassword}
@@ -94,7 +96,7 @@ export function Profile() {
             />
           </Field>
 
-          <Field label="New password">
+          <Field label={t("newPassword")}>
             <input
               type="password"
               value={newPassword}
@@ -103,7 +105,7 @@ export function Profile() {
             />
           </Field>
 
-          <Field label="Confirm new password">
+          <Field label={t("confirmNewPassword")}>
             <input
               type="password"
               value={confirmPassword}
@@ -113,7 +115,7 @@ export function Profile() {
           </Field>
 
           <button type="submit" style={btn} disabled={changing}>
-            {changing ? "Saving..." : "Change Password"}
+            {changing ? t("savingPassword") : t("changePassword")}
           </button>
         </form>
       </div>

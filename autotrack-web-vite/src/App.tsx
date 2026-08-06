@@ -20,6 +20,7 @@ import { ConfirmEmail } from "./pages/auth/ConfirmEmail";
 import { ForgotPassword } from "./pages/auth/ForgotPassword";
 import { ResetPassword } from "./pages/auth/ResetPassword";
 import { Profile } from "./pages/profile/Profile";
+import { AuthLayout } from "./layouts/AuthLayout";
 
 
 function EntryWrapper() {
@@ -74,23 +75,19 @@ function App() {
     <BrowserRouter>
 
       <Routes>
-       
-        <Route
-          path="/login"
-          element={
-            !isAuth ? <Login onLogin={onLogin} /> : <Navigate to="/vehicles" />
-          }
-        />
 
-        <Route 
-          path="/register" 
-          element={<Register />} />
-
-        <Route path="/confirm-email" element={<ConfirmEmail />} />
-
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-
-        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/login"
+            element={
+              !isAuth ? <Login onLogin={onLogin} /> : <Navigate to="/vehicles" />
+            }
+          />
+          <Route path="/register" element={<Register />} />
+          <Route path="/confirm-email" element={<ConfirmEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+        </Route>
        
         <Route
           path="/vehicles"

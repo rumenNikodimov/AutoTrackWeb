@@ -125,7 +125,7 @@ function Field({
 const container: React.CSSProperties = {
   maxWidth: 420,
   margin: "0 auto",
-  padding: "80px 12px"
+  padding: "16px 12px 80px"
 };
 
 const card: React.CSSProperties = {
