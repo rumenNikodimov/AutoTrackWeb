@@ -159,41 +159,59 @@ export function VehicleCard({ vehicle, onDelete, isSelected, onSelect }: Props) 
         setMenuOpen(false);
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-1px)";
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow = isSelected
+          ? "0 20px 40px rgba(37,99,235,0.28)"
+          : "0 12px 28px rgba(0,0,0,0.35)";
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = isSelected
+          ? "0 16px 30px rgba(37,99,235,0.2)"
+          : "var(--ui-shadow)";
       }}
     >
-      <div style={{ marginBottom: 12, flex: 1 }}>
-        <div style={topRow}>
-          <div style={title}>
-            {vehicle.brand} {vehicle.model}
-          </div>
-        </div>
+      {/* ── Title row ── */}
+      <div style={titleRow}>
+        <span style={vehicleName}>{vehicle.brand} {vehicle.model}</span>
+        {vehicle.year && <span style={yearBadge}>{vehicle.year}</span>}
+      </div>
 
-        <div style={infoGrid}>
-          <InfoItem label={t("licensePlate")} value={vehicle.licensePlate || t("notAvailable")} />
-          <InfoItem label={t("year")} value={String(vehicle.year || t("notAvailable"))} />
-          <InfoItem label={`${t("currentMileage")} |`} value={mileageText} />
-          <InfoItem
-            label={t("reminders")}
-            value={
-              <div style={reminderList}>
-                <span style={reminderSummaryLine}>🔴 {overdueCount}</span>
-                <span style={reminderSummaryLine}>🟡 {upcomingCount}</span>
-                <span style={reminderSummaryLine}>✅ {completedCount} {t("completed")}</span>
-                <span style={reminderLine} title={nextReminderTitle}>{nextReminderTitle}</span>
-                <span style={reminderSubLine}>{nextReminderSubline}</span>
-              </div>
-            }
-          />
+      {/* ── Stats row: plate + mileage ── */}
+      <div style={statsRow}>
+        <div style={statChip}>
+          <span style={statIcon}>🪪</span>
+          <span style={statValue}>{vehicle.licensePlate || t("notAvailable")}</span>
         </div>
+        <div style={statChip}>
+          <span style={statIcon}>🛣</span>
+          <span style={statValue}>{mileageText}</span>
+        </div>
+      </div>
 
-        {!isSelected && (
-          <p style={hintText}>{t("tapCardToShowActions")}</p>
+      {/* ── Reminders row ── */}
+      <div style={remindersRow}>
+        <span style={remLabel}>{t("reminders")}</span>
+        <div style={badgesGroup}>
+          <span style={overdueCount > 0 ? badgeRed : badgeNeutral}>🔴 {overdueCount}</span>
+          <span style={upcomingCount > 0 ? badgeYellow : badgeNeutral}>🟡 {upcomingCount}</span>
+          <span style={completedCount > 0 ? badgeGreen : badgeNeutral}>✅ {completedCount}</span>
+        </div>
+      </div>
+
+      {/* ── Next reminder ── */}
+      <div style={nextReminderRow}>
+        <span style={nextRemTitle} title={nextReminderTitle}>
+          {nextReminderTitle}
+        </span>
+        {nextReminderSubline !== t("none") && (
+          <span style={nextReminderSub}>{nextReminderSubline}</span>
         )}
       </div>
+
+      {!isSelected && (
+        <p style={hintText}>{t("tapCardToShowActions")}</p>
+      )}
 
       {/* ✅ separator */}
       {isSelected && <div style={divider} />}
@@ -317,139 +335,174 @@ export function VehicleCard({ vehicle, onDelete, isSelected, onSelect }: Props) 
   );
 }
 
-function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div style={infoItem}>
-      <span style={infoLabel}>{label}</span>
-      {typeof value === "string" ? (
-        <span style={infoValue} title={value}>{value}</span>
-      ) : (
-        <div style={infoNodeValue}>{value}</div>
-      )}
-    </div>
-  );
-}
-
-
 /* ✅ styles */
-
 
 const card: React.CSSProperties = {
   position: "relative",
   zIndex: 1,
   background: "var(--ui-card-bg)",
-  padding: 18,
+  padding: "16px 18px",
   borderRadius: 20,
   border: "1px solid var(--ui-card-border)",
-  marginBottom: 16,
+  marginBottom: 14,
   boxShadow: "var(--ui-shadow)",
-  transition: "all 0.2s",
+  transition: "transform 0.18s ease, box-shadow 0.18s ease",
   cursor: "default",
-  backdropFilter: "blur(10px)",
+  backdropFilter: "blur(12px)",
 };
 
 const selectedCard: React.CSSProperties = {
   ...card,
-  border: "1px solid rgba(59,130,246,0.45)",
+  border: "1px solid rgba(59,130,246,0.5)",
   boxShadow: "0 16px 30px rgba(37,99,235,0.2)",
 };
 
-const title: React.CSSProperties = {
-  fontSize: 18,
-  fontWeight: 700,
-  color: "var(--ui-text-main)",
-  marginBottom: 0,
-  textAlign: "left",
-  lineHeight: 1.2,
-  flex: 1,
+/* Title row */
+const titleRow: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  marginBottom: 12,
 };
 
-const topRow: React.CSSProperties = {
+const vehicleName: React.CSSProperties = {
+  fontSize: 20,
+  fontWeight: 800,
+  color: "var(--ui-text-main)",
+  letterSpacing: "-0.02em",
+  lineHeight: 1.2,
+};
+
+const yearBadge: React.CSSProperties = {
+  fontSize: 13,
+  fontWeight: 700,
+  color: "var(--ui-text-muted)",
+  background: "rgba(148,163,184,0.12)",
+  border: "1px solid rgba(148,163,184,0.2)",
+  borderRadius: 8,
+  padding: "3px 10px",
+  flexShrink: 0,
+};
+
+/* Stats row */
+const statsRow: React.CSSProperties = {
   display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: 12,
+  gap: 8,
   marginBottom: 10,
 };
 
-const infoGrid: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: 8,
-  marginTop: 10,
-};
-
-const infoItem: React.CSSProperties = {
+const statChip: React.CSSProperties = {
+  flex: 1,
   display: "flex",
-  flexDirection: "column",
   alignItems: "center",
-  justifyContent: "center",
-  padding: "8px 10px",
-  borderRadius: 10,
+  gap: 6,
+  background: "rgba(15,23,42,0.25)",
   border: "1px solid var(--ui-btn-border)",
-  background: "rgba(15,23,42,0.18)",
-  minHeight: 48,
+  borderRadius: 12,
+  padding: "8px 12px",
 };
 
-const infoLabel: React.CSSProperties = {
-  fontSize: 11,
-  color: "var(--ui-text-muted)",
-  marginBottom: 2,
-  textAlign: "center",
+const statIcon: React.CSSProperties = {
+  fontSize: 14,
+  flexShrink: 0,
 };
 
-const infoValue: React.CSSProperties = {
+const statValue: React.CSSProperties = {
   fontSize: 13,
-  color: "var(--ui-text-main)",
-  fontWeight: 600,
-  textAlign: "center",
-  whiteSpace: "nowrap",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  maxWidth: "100%",
-};
-
-const infoNodeValue: React.CSSProperties = {
-  width: "100%",
-  display: "flex",
-  justifyContent: "center",
-};
-
-const reminderList: React.CSSProperties = {
-  width: "100%",
-  display: "flex",
-  flexDirection: "column",
-  gap: 2,
-  alignItems: "center",
-};
-
-const reminderLine: React.CSSProperties = {
-  maxWidth: "100%",
-  fontSize: 12,
-  color: "var(--ui-text-main)",
-  fontWeight: 600,
-  whiteSpace: "nowrap",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-};
-
-const reminderSummaryLine: React.CSSProperties = {
-  ...reminderLine,
-  fontSize: 11,
   fontWeight: 700,
+  color: "var(--ui-text-main)",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
 };
 
-const reminderSubLine: React.CSSProperties = {
-  ...reminderLine,
+/* Reminders */
+const remindersRow: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  marginBottom: 6,
+  padding: "6px 10px",
+  borderRadius: 10,
+  background: "rgba(15,23,42,0.2)",
+  border: "1px solid var(--ui-btn-border)",
+};
+
+const remLabel: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 600,
+  color: "var(--ui-text-muted)",
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+};
+
+const badgesGroup: React.CSSProperties = {
+  display: "flex",
+  gap: 6,
+};
+
+const baseBadge: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 700,
+  padding: "2px 8px",
+  borderRadius: 20,
+};
+
+const badgeNeutral: React.CSSProperties = {
+  ...baseBadge,
+  color: "var(--ui-text-muted)",
+  background: "rgba(148,163,184,0.1)",
+};
+
+const badgeRed: React.CSSProperties = {
+  ...baseBadge,
+  color: "#fca5a5",
+  background: "rgba(239,68,68,0.15)",
+};
+
+const badgeYellow: React.CSSProperties = {
+  ...baseBadge,
+  color: "#fde68a",
+  background: "rgba(245,158,11,0.15)",
+};
+
+const badgeGreen: React.CSSProperties = {
+  ...baseBadge,
+  color: "#86efac",
+  background: "rgba(34,197,94,0.15)",
+};
+
+/* Next reminder */
+const nextReminderRow: React.CSSProperties = {
+  display: "flex",
+  alignItems: "baseline",
+  gap: 6,
+  marginBottom: 4,
+  paddingLeft: 2,
+};
+
+const nextRemTitle: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 600,
+  color: "var(--ui-text-main)",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  maxWidth: "60%",
+};
+
+const nextReminderSub: React.CSSProperties = {
   fontSize: 11,
   color: "var(--ui-text-muted)",
-  fontWeight: 500,
+  whiteSpace: "nowrap",
 };
 
 const hintText: React.CSSProperties = {
   marginTop: 8,
-  fontSize: 12,
+  fontSize: 11,
   color: "var(--ui-text-muted)",
+  textAlign: "center",
+  letterSpacing: "0.02em",
 };
 
 const divider: React.CSSProperties = {
@@ -467,29 +520,23 @@ const row: React.CSSProperties = {
 
 const baseBtn: React.CSSProperties = {
   flex: "1 1 120px",
-  minHeight: 46,
-  padding: "11px 12px",
+  minHeight: 44,
+  padding: "10px 12px",
   borderRadius: 12,
   border: "none",
   cursor: "pointer",
-  fontSize: 15,
+  fontSize: 14,
   fontWeight: 600,
   lineHeight: 1.1,
-  transition: "all 0.2s",
+  transition: "all 0.18s",
 };
-
-// const primaryBtn: React.CSSProperties = {
-//   ...baseBtn,
-//   background: "linear-gradient(135deg, #3b82f6, #2563eb)",
-//   color: "white"
-// };
 
 const secondaryBtn: React.CSSProperties = {
   ...baseBtn,
   background: "linear-gradient(180deg, rgba(51,65,85,0.72), rgba(30,41,59,0.72))",
   color: "var(--ui-btn-text)",
-  border: "1px solid rgba(148,163,184,0.38)",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
+  border: "1px solid rgba(148,163,184,0.3)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.07)",
 };
 
 const menuBtn: React.CSSProperties = {
@@ -507,13 +554,12 @@ const menuBtn: React.CSSProperties = {
 
 const menuBtnInRow: React.CSSProperties = {
   ...menuBtn,
-  width: 46,
-  minWidth: 46,
-  height: 46,
-  borderRadius: 14,
+  width: 44,
+  minWidth: 44,
+  height: 44,
   flex: "0 0 auto",
-  border: "1px solid rgba(148,163,184,0.45)",
-  background: "linear-gradient(180deg, rgba(59,130,246,0.22), rgba(30,64,175,0.2))",
+  border: "1px solid rgba(148,163,184,0.35)",
+  background: "linear-gradient(180deg, rgba(59,130,246,0.18), rgba(30,64,175,0.16))",
 };
 
 const dot: React.CSSProperties = {
@@ -536,8 +582,8 @@ const inlineActionBtn: React.CSSProperties = {
   ...secondaryBtn,
   flex: "1 1 120px",
   minWidth: 0,
-  minHeight: 46,
-  padding: "11px 12px",
+  minHeight: 44,
+  padding: "10px 12px",
   borderRadius: 12,
   textAlign: "center",
 };
@@ -549,8 +595,8 @@ const inlineEditBtn: React.CSSProperties = {
 const inlineDeleteBtn: React.CSSProperties = {
   ...inlineActionBtn,
   color: "#fecaca",
-  border: "1px solid rgba(239,68,68,0.55)",
-  background: "linear-gradient(180deg, rgba(239,68,68,0.22), rgba(185,28,28,0.16))",
+  border: "1px solid rgba(239,68,68,0.5)",
+  background: "linear-gradient(180deg, rgba(239,68,68,0.18), rgba(185,28,28,0.12))",
 };
 
 

@@ -1,9 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { getStoredVehicleId } from "../utils/vehicleSession";
 
 export function MobileNav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const pathVehicleId = location.pathname.split("/")[2];
   const vehicleId = pathVehicleId || getStoredVehicleId() || "1";
 
@@ -12,7 +14,7 @@ export function MobileNav() {
       <div style={bar}>
       <NavBtn
         active={location.pathname === "/vehicles"}
-        label="Garage"
+        label={t("vehicles")}
         onClick={() => navigate("/vehicles")}
       >
         <GarageIcon />
@@ -20,7 +22,7 @@ export function MobileNav() {
 
       <NavBtn
         active={location.pathname.includes("/entries")}
-        label="History"
+        label={t("history")}
         onClick={() =>
           navigate(`/vehicles/${vehicleId}/entries`)
         }
@@ -28,13 +30,13 @@ export function MobileNav() {
         <HistoryIcon />
       </NavBtn>
 
-      <NavBtn highlight label="Add" onClick={() => navigate(`/vehicles/${vehicleId}/entries/add`)}>
+      <NavBtn highlight label={t("add")} onClick={() => navigate(`/vehicles/${vehicleId}/entries/add`)}>
         <AddIcon />
       </NavBtn>
 
       <NavBtn
         active={location.pathname.includes("/dashboard")}
-        label="Insights"
+        label={t("insights")}
         onClick={() =>
           navigate(`/vehicles/${vehicleId}/dashboard`)
         }
@@ -44,7 +46,7 @@ export function MobileNav() {
 
       <NavBtn
         active={location.pathname.includes("/reminders")}
-        label="Reminders"
+        label={t("reminders")}
         onClick={() => navigate(`/vehicles/${vehicleId}/reminders`)}
       >
         <BellIcon />
@@ -52,7 +54,7 @@ export function MobileNav() {
 
       <NavBtn
         active={location.pathname.includes("/profile")}
-        label="Profile"
+        label={t("profile")}
         onClick={() => navigate(`/profile`)}
       >
         <ProfileIcon />

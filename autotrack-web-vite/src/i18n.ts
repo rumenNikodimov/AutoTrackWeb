@@ -8,6 +8,9 @@ i18n.use(initReactI18next).init({
     en: {
       translation: {
         vehicles: "Garage",
+        history: "History",
+        add: "Add",
+        insights: "Insights",
         dashboard: "Dashboard",
         addEntry: "Add entry",
         entryLog: "Entry log",
@@ -193,6 +196,9 @@ i18n.use(initReactI18next).init({
     bg: {
       translation: {
         vehicles: "Гараж",
+        history: "История",
+        add: "Добави",
+        insights: "Статистики",
         dashboard: "Табло",
         addEntry: "Добави запис",
         entryLog: "История на записите",
